@@ -68,12 +68,12 @@ const Login = ({ setIsAuthenticated }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-100 poppins-regular">
       <Helmet>
-        <title>Eco Stay | Admin Login</title>
-        <meta name="Admin Login" content="Eco Stay Admin Login!" />
+        <title>Rentmosh | Admin Login</title>
+        <meta name="Admin Login" content="Rentmosh Admin Login!" />
       </Helmet>
       <div className="w-full max-w-md mx-4 bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-6 pb-0">
-          <h2 className="text-2xl font-bold text-center text-gray-900">Eco Stay Admin Login</h2>
+          <h2 className="text-2xl font-bold text-center text-gray-900">Rentmosh Admin Login</h2>
           <p className="mt-2 text-center text-gray-600">
             Enter your credentials to access the admin dashboard
           </p>

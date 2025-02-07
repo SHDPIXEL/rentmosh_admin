@@ -1,31 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import { SquarePen, Trash2, RefreshCcw } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { toast, ToastContainer } from "react-toastify";
+import API from "../../lib/utils"; // Ensure API utility is properly set up
 import "react-toastify/dist/ReactToastify.css";
 
 const ListOffer = () => {
   const navigate = useNavigate();
+  const [offers, setOffers] = useState([]);
 
-  // Static offer data
-  const [offers, setOffers] = useState([
-    {
-      id: 1,
-      name: "Winter Sale",
-      description: "Get up to 50% off on all products.",
-      code: "WINTER50",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Summer Sale",
-      description: "Get up to 30% off on select items.",
-      code: "SUMMER30",
-      status: "Inactive",
-    },
-  ]);
+  // Fetch offer list
+  useEffect(() => {
+    const fetchOffers = async () => {
+      try {
+        const response = await API.get("/admin/offers");
+        setOffers(response.data.offers);
+      } catch (error) {
+        console.error("Error fetching offers:", error);
+        toast.error("Failed to fetch offers.", { position: "top-right" });
+      }
+    };
+
+    fetchOffers();
+  }, []);
 
   // Custom confirmation toast
   const confirmAction = (message, onConfirm) => {
@@ -55,21 +54,36 @@ const ListOffer = () => {
   };
 
   // Delete offer
-  const deleteOffer = (id) => {
-    confirmAction("Are you sure you want to delete this offer?", () => {
-      setOffers((prev) => prev.filter((item) => item.id !== id));
-      toast.success("Offer deleted successfully!", { position: "top-right" });
+  const deleteOffer = async (id) => {
+    confirmAction("Are you sure you want to delete this offer?", async () => {
+      try {
+        await API.delete(`/admin/offers/${id}`);
+        setOffers((prev) => prev.filter((item) => item.id !== id));
+        toast.success("Offer deleted successfully!", { position: "top-right" });
+      } catch (error) {
+        console.error("Error deleting offer:", error);
+        toast.error("Failed to delete offer.", { position: "top-right" });
+      }
     });
   };
 
   // Toggle offer status
-  const updateStatus = (row) => {
-    confirmAction("Are you sure you want to change the status?", () => {
-      const newStatus = row.status === "Active" ? "Inactive" : "Active";
-      setOffers((prev) =>
-        prev.map((item) => (item.id === row.id ? { ...item, status: newStatus } : item))
-      );
-      toast.info(`Status changed to ${newStatus}!`, { position: "top-right" });
+  const updateStatus = async (row) => {
+    confirmAction("Are you sure you want to change the status?", async () => {
+      try {
+        const newStatus = row.status === "Active" ? "Inactive" : "Active";
+        const response = await API.put(`/admin/offers/${row.id}`, { status: newStatus });
+
+        if (response.status === 200) {
+          setOffers((prev) =>
+            prev.map((item) => (item.id === row.id ? { ...item, status: newStatus } : item))
+          );
+          toast.success(`Status changed to ${newStatus}!`, { position: "top-right" });
+        }
+      } catch (error) {
+        console.error("Error updating offer status:", error);
+        toast.error("Failed to update status.", { position: "top-right" });
+      }
     });
   };
 
@@ -85,7 +99,7 @@ const ListOffer = () => {
   const actions = [
     {
       label: <SquarePen className="w-4 h-4" />,
-      handler: (row) => navigate("/offer/edit", { state: { offerData: row } }),
+      handler: (row) => navigate("/offer/add", { state: { offerData: row } }),
       className: "text-green-500 hover:text-green-600",
     },
     {
@@ -103,7 +117,7 @@ const ListOffer = () => {
   return (
     <div className="p-6">
       <Helmet>
-        <title>Eco Stay | Offer List</title>
+        <title>Rentmosh | Offer List</title>
         <meta name="Offer List" content="Eco Stay Offer List!" />
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Offer List</h1>

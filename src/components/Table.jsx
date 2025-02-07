@@ -3,7 +3,7 @@ import React from "react";
 const validAccessors = ["images", ""];
 
 const Table = ({ columns, data, globalActions }) => {
-
+console.log(columns,data)
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse border border-gray-200 bg-white shadow-md rounded-lg md:text-sm text-xs">

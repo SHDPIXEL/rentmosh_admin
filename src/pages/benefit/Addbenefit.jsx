@@ -1,46 +1,110 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Hash, Info, ToggleRight } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useLocation, useNavigate } from "react-router-dom";
+import API from "../../lib/utils"; // Assuming you have an API utility to make requests
 
 const AddBenefits = () => {
   const [formData, setFormData] = useState({
+    id: null, // Ensure ID is null by default
     title: "",
     slug: "",
     description: "",
     status: "",
   });
 
+  const location = useLocation();
+  const benefitData = location.state?.benefitData;
+  const benefitId = location.state?.benefitId;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (benefitData) {
+      setFormData({
+        id: benefitData.id || "", // Ensure ID is null if not available
+        title: benefitData.title || "",
+        slug: benefitData.slug || "",
+        description: benefitData.description || "",
+        status: benefitData.status || "",
+      });
+    }
+  }, [benefitData]);
+
+  useEffect(() => {
+    if (benefitId) {
+      const fetchBenefitData = async () => {
+        try {
+          const response = await API.get(`/admin/benefits/${benefitId}`);
+          setFormData({
+            id: response.data.benefit.id, // Ensure ID is set properly
+            title: response.data.benefit.title,
+            slug: response.data.benefit.slug,
+            description: response.data.benefit.description,
+            status: response.data.benefit.status,
+          });
+        } catch (error) {
+          console.error("Error fetching benefit:", error);
+          toast.error("Failed to fetch benefit data.");
+        }
+      };
+      fetchBenefitData();
+    }
+  }, [benefitId]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.status) {
-      toast.error("Please select a status.", { position: "top-right" });
+      toast.error("Please select a status.");
       return;
     }
-    console.log("Form Data:", formData);
-    toast.success("Benefit added successfully!", { position: "top-right" });
 
-    // Reset form after submission
-    setFormData({
-      title: "",
-      slug: "",
-      description: "",
-      status: "",
-    });
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authorization token is missing");
+
+      let response;
+      if (formData.id && formData.id !== "") {
+        // If ID exists and is not an empty string, update the benefit
+        response = await API.put(`/admin/benefits/${formData.id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+          "Content-Type": "multipart/form-data",
+        });
+        
+      } else {
+        // If no ID, create a new benefit
+        response = await API.post("/admin/benefits", formData, {
+          headers: { Authorization: `Bearer ${token}` },
+          "Content-Type": "multipart/form-data",
+        });
+      }
+
+      toast.success(response.data.message);
+      setTimeout(() => navigate("/benefits/list"), 1000);
+    } catch (error) {
+      console.error("Error processing benefit:", error);
+      toast.error(error.response?.data?.message || "Error processing benefit.");
+    }
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Add New Benefit</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">
+        {formData.id ? "Update Benefit" : "Add New Benefit"}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
         {/* Title */}
         <div className="flex flex-col">
-          <label htmlFor="title" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <label
+            htmlFor="title"
+            className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
+          >
             <Info className="h-4 w-4 text-gray-400" />
             Benefit Title
           </label>
@@ -58,7 +122,10 @@ const AddBenefits = () => {
 
         {/* Slug */}
         <div className="flex flex-col">
-          <label htmlFor="slug" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <label
+            htmlFor="slug"
+            className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
+          >
             <Hash className="h-4 w-4 text-gray-400" />
             Slug
           </label>
@@ -76,7 +143,10 @@ const AddBenefits = () => {
 
         {/* Description */}
         <div className="flex flex-col">
-          <label htmlFor="description" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <label
+            htmlFor="description"
+            className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
+          >
             <Info className="h-4 w-4 text-gray-400" />
             Description
           </label>
@@ -94,7 +164,10 @@ const AddBenefits = () => {
 
         {/* Status */}
         <div className="flex flex-col">
-          <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <label
+            htmlFor="status"
+            className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
+          >
             <ToggleRight className="h-4 w-4 text-gray-400" />
             Status
           </label>
@@ -120,7 +193,7 @@ const AddBenefits = () => {
             type="submit"
             className="w-full px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
           >
-            Add Benefit
+            {formData.id ? "Update Benefit" : "Add Benefit"}
           </button>
         </div>
       </form>

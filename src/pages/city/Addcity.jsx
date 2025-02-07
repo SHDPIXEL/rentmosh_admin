@@ -1,15 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Info, Image, Hash, ToggleRight } from "lucide-react";
+import { useLocation, useNavigate } from "react-router";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../../lib/utils";
 
 const AddCity = () => {
   const [formData, setFormData] = useState({
+    id: null, // Ensure ID is tracked for updates
     name: "",
-    image: null, // Store file instead of string
+    image: null,
     slug: "",
     status: "",
   });
+
+  const location = useLocation();
+  const cityData = location.state?.cityData; // Data passed from list
+  const cityId = location.state?.cityId; // Passed cityId
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (cityData) {
+      setFormData({
+        id: cityData.id || "", // Ensure id is set
+        name: cityData.name || "",
+        slug: cityData.slug || "",
+        status: cityData.status || "",
+        image: cityData.image || "",
+      });
+    }
+  }, [cityData]);
+
+  useEffect(() => {
+    if (cityId) {
+      const fetchCityData = async () => {
+        try {
+          const response = await API.get(`/admin/cities/${cityId}`);
+          console.log(response.data)
+          setFormData({
+            id: response.data.city.id, // Ensure ID is assigned
+            name: response.data.city.name,
+            slug: response.data.city.slug,
+            status: response.data.city.status,
+            image: response.data.city.image || null,
+          });
+        } catch (error) {
+          console.error("Error fetching city:", error);
+          toast.error("Failed to fetch city data.", { position: "top-right" });
+        }
+      };
+      fetchCityData();
+    }
+  }, [cityId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,59 +62,106 @@ const AddCity = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
     if (!formData.status) {
       toast.error("Please select a status.", { position: "top-right" });
       return;
     }
-    console.log("Form Data:", formData);
-    toast.success("City added successfully!", { position: "top-right" });
-
-    // Reset form after submission
-    setFormData({
-      name: "",
-      image: null,
-      slug: "",
-      status: "",
-    });
+  
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authorization token is missing");
+  
+      const cityData = new FormData();
+      cityData.append("status", formData.status);
+  
+      // Always append other fields, even if not updated
+      if (formData.name) {
+        cityData.append("name", formData.name);
+      }
+      if (formData.slug) {
+        cityData.append("slug", formData.slug);
+      }
+  
+      // Only append image if it's a new file (not an existing URL)
+      if (formData.image && typeof formData.image !== "string") {
+        cityData.append("image", formData.image);
+      }
+  
+      let response;
+      if (formData.id) {
+        // **Update existing city (PUT)**
+        response = await API.put(`/admin/update/cities/${formData.id}`, cityData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        console.log(response);
+        if (response.status === 200) {
+          toast.success("City updated successfully!", { position: "top-right" });
+          setTimeout(() => navigate("/city/list"), 1000); // Delay navigation
+        }
+      } else {
+        // **Add new city (POST)**
+        response = await API.post("/admin/cities", cityData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+  
+        if (response.status === 200 || response.status === 201) {
+          toast.success("City added successfully!", { position: "top-right" });
+          setTimeout(() => navigate("/city/list"), 1000);
+        }
+      }
+  
+      // Reset form after success
+      setFormData({ id: "", name: "", image: null, slug: "", status: "" });
+    } catch (error) {
+      console.error("Error submitting city:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Error processing city. Please try again.",
+        { position: "top-right" }
+      );
+    }
   };
+  
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Add New City</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">
+        {formData.id ? "Edit City" : "Add New City"}
+      </h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
-        {/* Name */}
         <div className="flex flex-col">
           <label
             htmlFor="name"
             className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
           >
-            <Info className="h-4 w-4 text-gray-400" />
-            City Name
+            <Info className="h-4 w-4 text-gray-400" /> City Name
           </label>
           <input
             type="text"
             name="name"
             id="name"
+            placeholder="Enter City Name"
             value={formData.name}
             onChange={handleChange}
-            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
-            placeholder="Enter City name"
+            className="p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
             required
           />
         </div>
-
-        {/* Image Upload */}
         <div className="flex flex-col">
-          <label
-            htmlFor="image"
-            className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
-          >
-            <Image className="h-4 w-4 text-gray-400" />
-            Upload Image
+          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <Image className="h-4 w-4 text-gray-400" /> Upload Image
           </label>
-          <div className="relative w-full">
+          <label className="p-3 bg-black rounded-lg cursor-pointer text-center text-white hover:bg-white hover:border hover:border-gray-800 hover:text-black font-medium w-1/3 transition-all">
+            Choose File
             <input
               type="file"
               name="image"
@@ -81,56 +170,49 @@ const AddCity = () => {
               onChange={handleFileChange}
               className="hidden"
             />
-            <label
-              htmlFor="image"
-              className="flex items-center justify-center w-1/3 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg cursor-pointer shadow-sm hover:bg-white hover:text-black hover:border transition-all duration-200"
-            >
-              Choose File
-            </label>
-            {formData.image && (
-              <p className="mt-2 text-sm text-gray-500">
-                Selected: {formData.image.name}
-              </p>
-            )}
-          </div>
+          </label>
+          {formData.image && typeof formData.image === "string" && (
+            <p className="text-sm text-gray-500 mt-2">
+              Current: {formData.image}
+            </p>
+          )}
+          {formData.image && formData.image instanceof File && (
+            <p className="text-sm text-gray-500 mt-2">
+              Selected: {formData.image.name}
+            </p>
+          )}
         </div>
-
-        {/* Slug */}
         <div className="flex flex-col">
           <label
             htmlFor="slug"
             className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
           >
-            <Hash className="h-4 w-4 text-gray-400" />
-            Slug
+            <Hash className="h-4 w-4 text-gray-400" /> Slug
           </label>
           <input
             type="text"
             name="slug"
             id="slug"
+            placeholder="Enter City Slug"
             value={formData.slug}
             onChange={handleChange}
-            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
-            placeholder="Enter Slug"
+            className="p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
             required
           />
         </div>
-
-        {/* Status */}
         <div className="flex flex-col">
           <label
             htmlFor="status"
             className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
           >
-            <ToggleRight className="h-4 w-4 text-gray-400" />
-            Status
+            <ToggleRight className="h-4 w-4 text-gray-400" /> Status
           </label>
           <select
             name="status"
             id="status"
             value={formData.status}
             onChange={handleChange}
-            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
+            className="p-3 rounded-lg border border-gray-300"
             required
           >
             <option value="" disabled>
@@ -140,19 +222,15 @@ const AddCity = () => {
             <option value="inactive">Inactive</option>
           </select>
         </div>
-
-        {/* Submit Button */}
         <div className="pt-6 border-t border-gray-200">
           <button
             type="submit"
-            className="w-full px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
+            className="w-full px-6 py-3 bg-black text-white font-medium rounded-lg"
           >
-            Add City
+            {formData.id ? "Update City" : "Add City"}
           </button>
         </div>
       </form>
-
-      {/* Toast Notification Container */}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

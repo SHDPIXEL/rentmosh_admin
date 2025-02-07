@@ -1,19 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Image, Hash, ToggleRight, Info } from "lucide-react";
 import { Helmet } from "react-helmet-async";
+import API from "../../lib/utils"; // Import your API utility
 
 const AddProduct = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
+    id: null, // For updates
     benefitId: "",
     title: "",
     image: null,
     location: "",
-    price: [{ months: "3 months", amount: 600 }, { months: "6 months", amount: 1500 }],
+    price: [
+      { months: "3 months", amount: 600 },
+      { months: "6 months", amount: 1500 },
+    ],
     brand: "",
     size: "",
     material: "",
@@ -21,11 +27,57 @@ const AddProduct = () => {
     status: "",
   });
 
-  const benefits = [
-    { id: "1", title: "Easy Payment" },
-    { id: "2", title: "Free Delivery" },
-    { id: "3", title: "Discounted Rent" },
-  ];
+  const [benefits, setbenefits] = useState([]);
+  const [loading, setLoading] = useState(true); // Loading state to show a loading indicator
+
+  useEffect(() => {
+    const fetchBenefits = async () => {
+      try {
+        const response = await API.get("/admin/benefits");
+        console.log("API Response:", response.data.benefits); // Log the API response for debugging
+
+        if (
+          response.data.benefits &&
+          response.data.benefits &&
+          response.data.benefits.length > 0
+        ) {
+          setbenefits(response.data.benefits);
+        } else {
+          toast.error("No categories found.", { position: "top-right" });
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Failed to load categories.", { position: "top-right" });
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    fetchBenefits();
+  }, []);
+
+  // Pre-fill data if we're editing an existing subcategory
+  useEffect(() => {
+    if (location.state?.productData) {
+      const productData = location.state.productData;
+      setFormData({
+        id: productData.id || null,
+        benefitId: productData.benefitId || "",
+        title: productData.title || "",
+        image: productData.image || null,
+        location: productData.location || "",
+        price: productData.price || [
+          { months: "3 months", amount: 600 },
+          { months: "6 months", amount: 1500 },
+        ],
+        brand: productData.brand || "",
+        size: productData.size || "",
+        material: productData.material || "",
+        colour: productData.colour || "",
+        status: productData.status || "",
+      });
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,21 +88,108 @@ const AddProduct = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Product Form Submitted", formData);
 
-    // Show success message
-    toast.success("Product added successfully!", {
-      position: "top-right",
-      autoClose: 3000,
-    });
+    // Validate required fields
+    if (
+      !formData.benefitId ||
+      !formData.title ||
+      !formData.location ||
+      !formData.price.length
+    ) {
+      toast.error("Benefit, Title, Location, and Price are required fields.", {
+        position: "top-right",
+      });
+      return;
+    }
 
-    // Delay navigation to allow toast to appear
-    setTimeout(() => {
-      // Navigate to the product list page
-      navigate("/product/list");
-    }, 1000); // Delay by 1 second
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authorization token is missing");
+
+      const productData = new FormData();
+      productData.append("benefitId", formData.benefitId);
+      productData.append("title", formData.title);
+      productData.append("location", formData.location);
+      productData.append("brand", formData.brand || "");
+      productData.append("size", formData.size || "");
+      productData.append("material", formData.material || "");
+      productData.append("colour", formData.colour || "");
+      productData.append("status", formData.status || "active");
+
+      // Convert price array to JSON string
+      productData.append("price", JSON.stringify(formData.price));
+
+      if (formData.image && typeof formData.image !== "string") {
+        productData.append("image", formData.image);
+      }
+
+      let response;
+
+      if (formData.id) {
+        // **Update existing product (PUT)**
+        response = await API.put(
+          `/admin/products/${formData.id}`,
+          productData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+
+        if (response.status === 200) {
+          toast.success("Product updated successfully!", {
+            position: "top-right",
+          });
+          setTimeout(() => navigate("/products/list"), 1000);
+        }
+      } else {
+        // **Create new product (POST)**
+        response = await API.post("/admin/products", productData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          toast.success("Product added successfully!", {
+            position: "top-right",
+          });
+          setTimeout(() => navigate("/products/list"), 1000);
+        }
+      }
+
+      // Reset form after success
+      setFormData({
+        id: null,
+        benefitId: "",
+        title: "",
+        image: null,
+        location: "",
+        price: [
+          { months: "3 months", amount: 600 },
+          { months: "6 months", amount: 1500 },
+        ],
+        brand: "",
+        size: "",
+        material: "",
+        colour: "",
+        status: "",
+      });
+    } catch (error) {
+      console.error("Error submitting product:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Error processing product. Please try again.",
+        {
+          position: "top-right",
+        }
+      );
+    }
   };
 
   return (
@@ -109,7 +248,10 @@ const AddProduct = () => {
 
         {/* Image Upload */}
         <div className="flex flex-col">
-          <label htmlFor="image" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <label
+            htmlFor="image"
+            className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
+          >
             <Image className="h-4 w-4 text-gray-400" />
             Upload Image
           </label>
@@ -128,13 +270,20 @@ const AddProduct = () => {
             >
               Choose File
             </label>
-            {formData.image && <p className="mt-2 text-sm text-gray-500">Selected: {formData.image.name}</p>}
+            {formData.image && (
+              <p className="mt-2 text-sm text-gray-500">
+                Selected: {formData.image.name}
+              </p>
+            )}
           </div>
         </div>
 
         {/* Location */}
         <div className="flex flex-col">
-          <label htmlFor="location" className="text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="location"
+            className="text-sm font-medium text-gray-700 mb-2"
+          >
             Location
           </label>
           <input
@@ -151,38 +300,45 @@ const AddProduct = () => {
 
         {/* Price (Months) */}
         <div className="flex flex-col">
-          <label htmlFor="price" className="text-sm font-medium text-gray-700 mb-2">
+          <label
+            htmlFor="price"
+            className="text-sm font-medium text-gray-700 mb-2"
+          >
             Price (Months)
           </label>
-          {formData.price.map((item, index) => (
-            <div key={index} className="flex space-x-4 mb-4">
-              <input
-                type="text"
-                value={item.months}
-                readOnly
-                disabled
-                className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
-              />
-              <input
-                type="number"
-                name="price"
-                value={item.amount}
-                onChange={(e) => {
-                  const newPrice = [...formData.price];
-                  newPrice[index].amount = e.target.value;
-                  setFormData({ ...formData, price: newPrice });
-                }}
-                className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
-              />
-            </div>
-          ))}
+          {Array.isArray(formData.price) &&
+            formData.price.map((item, index) => (
+              <div key={index} className="flex space-x-4 mb-4">
+                <input
+                  type="text"
+                  value={item.months}
+                  readOnly
+                  disabled
+                  className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
+                />
+                <input
+                  type="number"
+                  name="price"
+                  value={item.amount}
+                  onChange={(e) => {
+                    const newPrice = [...formData.price];
+                    newPrice[index].amount = e.target.value;
+                    setFormData({ ...formData, price: newPrice });
+                  }}
+                  className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
+                />
+              </div>
+            ))}
         </div>
 
         {/* Brand, Size, Material, Colour, Status */}
         <div className="flex flex-col space-y-4">
           {/* Brand */}
           <div className="flex flex-col">
-            <label htmlFor="brand" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="brand"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Brand
             </label>
             <input
@@ -199,7 +355,10 @@ const AddProduct = () => {
 
           {/* Size */}
           <div className="flex flex-col">
-            <label htmlFor="size" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="size"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Size
             </label>
             <input
@@ -216,7 +375,10 @@ const AddProduct = () => {
 
           {/* Material */}
           <div className="flex flex-col">
-            <label htmlFor="material" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="material"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Material
             </label>
             <input
@@ -233,7 +395,10 @@ const AddProduct = () => {
 
           {/* Colour */}
           <div className="flex flex-col">
-            <label htmlFor="colour" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="colour"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Colour
             </label>
             <input
@@ -250,7 +415,10 @@ const AddProduct = () => {
 
           {/* Status */}
           <div className="flex flex-col">
-            <label htmlFor="status" className="text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="status"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
               Status
             </label>
             <select

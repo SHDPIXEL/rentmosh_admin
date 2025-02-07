@@ -107,7 +107,7 @@ const ListOrder = () => {
   return (
     <div className="p-6">
       <Helmet>
-        <title>Eco Stay | Order List</title>
+        <title>Rentmosh | Order List</title>
         <meta name="Order List" content="Eco Stay Order List!" />
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Order List</h1>

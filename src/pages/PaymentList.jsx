@@ -98,7 +98,7 @@ const ListPayments = () => {
   return (
     <div className="p-6">
       <Helmet>
-        <title>Eco Stay | Payment List</title>
+        <title>Rentmosh | Payment List</title>
         <meta name="Payment List" content="Eco Stay Payment List!" />
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Payment List</h1>

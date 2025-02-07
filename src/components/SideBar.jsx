@@ -14,6 +14,7 @@ import {
   Gift,
   Tag,
   CreditCard,
+  Users,
   Landmark,
   UserCheck,
   LogOut,
@@ -90,6 +91,7 @@ const Sidebar = ({ setIsAuthenticated }) => {
     },
     { path: '/ordersplaced', name: `Order'${"s"} Placed`, icon: ClipboardList, type: 'link' },
     { path: '/PaymentList', name: 'Payment Info', icon: CreditCard, type: 'link' },
+    { path: '/customerList', name: `Customer'${"s"}`, icon: Users, type: 'link' },
   ];
 
   const handleSubmenuToggle = (submenuName) => {

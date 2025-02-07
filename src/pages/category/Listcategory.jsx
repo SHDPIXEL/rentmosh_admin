@@ -1,31 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "../../components/Table";
 import { SquarePen, Trash2, RefreshCcw } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../../lib/utils"; // Make sure you have an API service file for making HTTP requests
 
 const ListCategory = () => {
   const navigate = useNavigate();
+  const [categories, setCategories] = useState([]); // Ensure categories is an empty array initially
 
-  // Static category data
-  const [categories, setCategories] = useState([
-    {
-      id: 1,
-      name: "Sofas",
-      image: "https://via.placeholder.com/50",
-      slug: "sofas",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Tables",
-      image: "https://via.placeholder.com/50",
-      slug: "tables",
-      status: "Inactive",
-    },
-  ]);
+  // Fetch category list from the API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await API.get("/admin/categories");
+        console.log(response.data)
+        setCategories(response.data); // Ensure categories is always an array
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Failed to fetch categories.", { position: "top-right" });
+        setCategories([]); // In case of error, ensure categories is an empty array
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Custom confirmation toast
   const confirmAction = (message, onConfirm) => {
@@ -55,21 +55,41 @@ const ListCategory = () => {
   };
 
   // Delete category
-  const deleteCategory = (id) => {
-    confirmAction("Are you sure you want to delete this category?", () => {
-      setCategories((prev) => prev.filter((item) => item.id !== id));
-      toast.success("Category deleted successfully!", { position: "top-right" });
+  const deleteCategory = async (id) => {
+    confirmAction("Are you sure you want to delete this category?", async () => {
+      try {
+        const response = await API.delete(`/admin/categories/${id}`);
+        if (response.status === 200) {
+          setCategories((prev) => prev.filter((item) => item.id !== id));
+          toast.success("Category deleted successfully!", { position: "top-right" });
+        }
+      } catch (error) {
+        console.error("Error deleting category:", error);
+        toast.error("Failed to delete category.", { position: "top-right" });
+      }
     });
   };
 
   // Toggle category status
-  const updateStatus = (row) => {
-    confirmAction("Are you sure you want to change the status?", () => {
-      const newStatus = row.status === "Active" ? "Inactive" : "Active";
-      setCategories((prev) =>
-        prev.map((item) => (item.id === row.id ? { ...item, status: newStatus } : item))
-      );
-      toast.info(`Status changed to ${newStatus}!`, { position: "top-right" });
+  const updateStatus = async (row) => {
+    confirmAction("Are you sure you want to change the status?", async () => {
+      try {
+        const newStatus = row.status === "Active" ? "Inactive" : "Active";
+        const response = await API.put(`/admin/categories/${row.id}`, {
+          status: newStatus,
+        });
+        if (response.status === 200) {
+          setCategories((prev) =>
+            prev.map((item) =>
+              item.id === row.id ? { ...item, status: newStatus } : item
+            )
+          );
+          toast.success(`Status changed to ${newStatus}!`, { position: "top-right" });
+        }
+      } catch (error) {
+        console.error("Error updating category status:", error);
+        toast.error("Failed to update category status.", { position: "top-right" });
+      }
     });
   };
 
@@ -91,7 +111,7 @@ const ListCategory = () => {
   const actions = [
     {
       label: <SquarePen className="w-4 h-4" />,
-      handler: (row) => navigate("/category/edit", { state: { categoryData: row } }),
+      handler: (row) => navigate("/categories/add", { state: { categoryData: row } }),
       className: "text-green-500 hover:text-green-600",
     },
     {
@@ -109,12 +129,12 @@ const ListCategory = () => {
   return (
     <div className="p-6">
       <Helmet>
-        <title>Eco Stay | Category List</title>
+        <title>Rentmosh | Category List</title>
         <meta name="Category List" content="Eco Stay Category List!" />
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Category List</h1>
 
-      {categories.length > 0 ? (
+      {Array.isArray(categories) && categories.length > 0 ? (
         <Table columns={columns} data={categories} globalActions={actions} />
       ) : (
         <div className="text-center text-gray-600 mt-10">No categories found</div>

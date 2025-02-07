@@ -82,7 +82,7 @@ const Dashboard = () => {
     <div>
       <Helmet>
         <title>Rentmosh | Dashboard</title>
-        <meta name="Dashboard" content="Eco Stay Dashboard!" />
+        <meta name="Dashboard" content="Rentmosh Dashboard!" />
       </Helmet>
       {/* Dashboard Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mx-6 mt-20">

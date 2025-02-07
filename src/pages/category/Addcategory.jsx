@@ -1,15 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Info, Image, Hash, ToggleRight } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate, useLocation } from "react-router-dom";
+import API from "../../lib/utils"; // Adjust based on your API configuration
 
 const AddCategory = () => {
   const [formData, setFormData] = useState({
+    id: null,
     name: "",
-    image: null, // Store file instead of string
+    image: null,
     slug: "",
     status: "",
   });
+
+  const location = useLocation();
+  const categoryData = location.state?.categoryData; // Data passed from category list
+  const categoryId = location.state?.categoryId; // Passed categoryId
+  const navigate = useNavigate();
+
+  // Fetch category data for editing if categoryId is passed
+  useEffect(() => {
+    if (categoryData) {
+      setFormData({
+        id: categoryData.id || "",
+        name: categoryData.name || "",
+        slug: categoryData.slug || "",
+        status: categoryData.status || "",
+        image: categoryData.image || null,
+      });
+    }
+  }, [categoryData]);
+
+  useEffect(() => {
+    if (categoryId) {
+      const fetchCategoryData = async () => {
+        try {
+          const response = await API.get(`/admin/categories/${categoryId}`);
+          setFormData({
+            id: response.data.category.id,
+            name: response.data.category.name,
+            slug: response.data.category.slug,
+            status: response.data.category.status,
+            image: response.data.category.image || null,
+          });
+        } catch (error) {
+          console.error("Error fetching category:", error);
+          toast.error("Failed to fetch category data.", { position: "top-right" });
+        }
+      };
+      fetchCategoryData();
+    }
+  }, [categoryId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,28 +62,76 @@ const AddCategory = () => {
     setFormData({ ...formData, image: e.target.files[0] });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!formData.status) {
       toast.error("Please select a status.", { position: "top-right" });
       return;
     }
-    console.log("Form Data:", formData);
-    toast.success("Category added successfully!", { position: "top-right" });
 
-    // Reset form after submission
-    setFormData({
-      name: "",
-      image: null,
-      slug: "",
-      status: "",
-    });
+    try {
+      const token = localStorage.getItem("authToken");
+      if (!token) throw new Error("Authorization token is missing");
+
+      const categoryData = new FormData();
+      categoryData.append("status", formData.status);
+
+      if (formData.name) {
+        categoryData.append("name", formData.name);
+      }
+      if (formData.slug) {
+        categoryData.append("slug", formData.slug);
+      }
+
+      if (formData.image && typeof formData.image !== "string") {
+        categoryData.append("image", formData.image);
+      }
+
+      let response;
+      if (formData.id) {
+        // **Update existing category (PUT)**
+        response = await API.put(`/admin/categories/${formData.id}`, categoryData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (response.status === 200) {
+          toast.success("Category updated successfully!", { position: "top-right" });
+          setTimeout(() => navigate("/categories/list"), 1000);
+        }
+      } else {
+        // **Add new category (POST)**
+        response = await API.post("/admin/categories", categoryData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        if (response.status === 200 || response.status === 201) {
+          toast.success("Category added successfully!", { position: "top-right" });
+          setTimeout(() => navigate("/categories/list"), 1000);
+        }
+      }
+
+      // Reset form after success
+      setFormData({ id: "", name: "", image: null, slug: "", status: "" });
+    } catch (error) {
+      console.error("Error submitting category:", error);
+      toast.error(
+        error.response?.data?.message || "Error processing category. Please try again.",
+        { position: "top-right" }
+      );
+    }
   };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4 text-gray-800">
-        Add New Category
+        {formData.id ? "Edit Category" : "Add New Category"}
       </h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
         {/* Name */}
@@ -149,7 +239,7 @@ const AddCategory = () => {
             type="submit"
             className="w-full px-6 py-3 bg-black text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
           >
-            Add Category
+            {formData.id ? "Update Category" : "Add Category"}
           </button>
         </div>
       </form>

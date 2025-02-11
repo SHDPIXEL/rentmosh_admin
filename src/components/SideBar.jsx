@@ -237,8 +237,8 @@ const Sidebar = ({ setIsAuthenticated }) => {
         {/* User Profile Section */}
         <div className="p-4 border-t border-gray-700 bg-gray-100 border flex-shrink-0">
           <div className="flex items-center space-x-3 px-4 py-3 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center">
-              <span className="text-sm font-medium text-black">RM</span>
+            <div className="w-8 h-8 rounded-full bg-[#960b22] flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-300">RM</span>
             </div>
             <div className="flex-grow">
               <h3 className="text-sm font-medium text-black">Rent Mosho</h3>

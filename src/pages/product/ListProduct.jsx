@@ -85,8 +85,8 @@ const ListProduct = () => {
     { header: "Benefits", accessor: "benefitId" },
     {
       header: "Image",
-      accessor: "image",
-      cell: (row) => <img src={row.image} alt="Product" className="w-12 h-12 object-cover rounded" />,
+      accessor: "product_image",
+      cell: (row) => <img src={row.product_image} alt="Product" className="w-12 h-12 object-cover rounded" />,
     },
     { header: "Location", accessor: "location" },
     {

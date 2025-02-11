@@ -125,10 +125,10 @@ const ListSubcategories = () => {
     { header: "Subcategory Name", accessor: "name" },
     {
       header: "Image",
-      accessor: "image",
+      accessor: "subcategory_image",
       cell: (row) => (
         <img
-          src={row.image}
+          src={row.subcategory_image}
           alt="Subcategory"
           className="w-12 h-12 object-cover rounded"
         />

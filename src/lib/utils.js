@@ -1,9 +1,9 @@
 import axios from "axios";
 
 // Base URL for the API
-// const BASE_URL = "http://192.168.91.244:4030"; // Replace with your server's base URL
-const BASE_URL = "http://192.168.17.244:4030"; // Replace with your server's base URL
-// const BASE_URL = "http://172.20.10.3:4030"; // Replace with your server's base URL
+export const BASE_URL = "http://192.168.91.244:4030"; // Replace with your server's base URL
+//export const BASE_URL = "http://192.168.17.244:4030"; // Replace with your server's base URL
+//export const BASE_URL = "http://172.20.10.3:4030"; // Replace with your server's base URL
 
 // Create an Axios instance
 const API = axios.create({

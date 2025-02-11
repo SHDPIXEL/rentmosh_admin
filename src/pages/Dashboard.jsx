@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Card from "../components/Card";
 import { Users, LayoutGrid , Layers, Package } from "lucide-react";
 import {
@@ -15,14 +15,46 @@ import {
   Legend,
 } from "recharts";
 import renderActiveShape from "../components/pieCharShape";
+import API from "../lib/utils";
 import { Helmet } from "react-helmet-async";
 
 const Dashboard = () => {
-  // Static data for the dashboard
-  const data = 10; // Example static data for total bookings
-  const totalUsers = 100; // Example static data for total users
-  const totalProducts = 40; // Example static data for total agents
-  const totalsubcategories = 20; // Example static data for total rooms
+  const [totalCategories, setTotalCategories] = useState(0);
+  const [totalSubcategories, setTotalSubcategories] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesRes, subcategoriesRes, productsRes, usersRes] = await Promise.all([
+          API.get("/admin/categories"),
+          API.get("/admin/subcategories"),
+          API.get("/admin/products"),
+          API.get("/admin/users"),
+        ]);
+
+        setTotalCategories(categoriesRes.data.length);
+        // console.log("categoriesRes",categoriesRes.data)
+        setTotalSubcategories(subcategoriesRes.data.subcategories.length);
+        // console.log("subcategoriesRes",subcategoriesRes.data.subcategories.length)
+        setTotalProducts(productsRes.data.products.length);
+        // console.log("productsRes",productsRes.data)
+        setTotalUsers(usersRes.data.users.length);
+        // console.log("usersRes",usersRes.data)
+        setLoading(false);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch dashboard data.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const bookingChartData = [
     { date: "2023-12-01", bookings: 30 },
@@ -41,6 +73,7 @@ const Dashboard = () => {
 
   const onPieEnter = (_, index) => {
     // Logic for handling pie chart interaction can go here
+    setActiveIndex(index);
   };
 
   const COLORS = ["#0088FE", "#00C49F"];
@@ -56,27 +89,19 @@ const Dashboard = () => {
   ];
 
   const DashboardItems = [
-    {
-      title: "Total Categories",
-      value: data,
-      icon: <LayoutGrid className="w-5 h-5" />, // Use Folder if preferred
-    },
-    {
-      title: "Total Sub-Categories",
-      value: totalsubcategories,
-      icon: <Layers className="w-5 h-5" />, // Alternative: <ListTree className="w-5 h-5" />
-    },
-    {
-      title: "Total Products",
-      value: totalProducts,
-      icon: <Package className="w-5 h-5" />, // Alternative: <ShoppingBag className="w-5 h-5" /> or <Boxes className="w-5 h-5" />
-    },
-    {
-      title: "Total Users",
-      value: totalUsers,
-      icon: <Users className="w-5 h-5" />,
-    },
+    { title: "Total Categories", value: totalCategories, icon: <LayoutGrid className="w-5 h-5" /> },
+    { title: "Total Sub-Categories", value: totalSubcategories, icon: <Layers className="w-5 h-5" /> },
+    { title: "Total Products", value: totalProducts, icon: <Package className="w-5 h-5" /> },
+    { title: "Total Users", value: totalUsers, icon: <Users className="w-5 h-5" /> },
   ];
+
+  if (loading) {
+    return <div className="text-center mt-10">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-10 text-red-500">{error}</div>;
+  }
 
   return (
     <div>
@@ -140,13 +165,13 @@ const Dashboard = () => {
           <ResponsiveContainer>
             <PieChart>
               <Pie
-                activeIndex={0}
+                activeIndex={activeIndex}
                 activeShape={renderActiveShape}
                 data={UserAgentPieCharData}
                 cx="50%"
                 cy="50%"
-                innerRadius={60}
-                outerRadius={80}
+                innerRadius={37}
+                outerRadius={55}
                 fill="#8884d8"
                 dataKey="value"
                 onMouseEnter={onPieEnter}

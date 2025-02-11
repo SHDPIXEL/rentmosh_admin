@@ -124,7 +124,7 @@ const reverifyKyc = async (id) => {
       accessor: "idProofImage",
       cell: (row) => (
         <img
-          src={row.idimage}
+          src={row.idProofImage}
           alt="ID"
           className="w-12 h-12 object-cover rounded"
         />

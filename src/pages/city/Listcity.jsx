@@ -125,10 +125,10 @@ const ListCity = () => {
     { header: "City Name", accessor: "name" },
     {
       header: "Image",
-      accessor: "image",
+      accessor: "city_image",
       cell: (row) => (
         <img
-          src={row.image}
+          src={row.city_image}
           alt="City"
           className="w-12 h-12 object-cover rounded"
         />

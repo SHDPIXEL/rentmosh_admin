@@ -98,9 +98,9 @@ const ListCategory = () => {
     { header: "Category Name", accessor: "name" },
     {
       header: "Image",
-      accessor: "image",
+      accessor: "category_image",
       cell: (row) => (
-        <img src={row.image} alt="Category" className="w-12 h-12 object-cover rounded" />
+        <img src={row.category_image} alt="Category" className="w-12 h-12 object-cover rounded" />
       ),
     },
     { header: "Slug", accessor: "slug" },

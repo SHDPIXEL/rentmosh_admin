@@ -14,7 +14,7 @@ const AddSubcategory = () => {
     id: null, // For updates
     categoryId: "",
     name: "",
-    image: null,
+    subcategory_image: null,
     slug: "",
     status: "",
   });
@@ -55,7 +55,7 @@ const AddSubcategory = () => {
         name: subcategoryData.name || "",
         slug: subcategoryData.slug || "",
         status: subcategoryData.status || "",
-        image: subcategoryData.image || null,
+        subcategory_image: subcategoryData.subcategory_image || null,
       });
     }
   }, [location.state]);
@@ -66,7 +66,7 @@ const AddSubcategory = () => {
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
+    setFormData({ ...formData, subcategory_image: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
@@ -90,8 +90,8 @@ const AddSubcategory = () => {
       subcategoryData.append("slug", formData.slug);
       subcategoryData.append("status", formData.status || "active");
 
-      if (formData.image && typeof formData.image !== "string") {
-        subcategoryData.append("image", formData.image);
+      if (formData.subcategory_image && typeof formData.subcategory_image !== "string") {
+        subcategoryData.append("subcategory_image", formData.subcategory_image);
       }
 
       let response;
@@ -129,7 +129,7 @@ const AddSubcategory = () => {
         id: null,
         categoryId: "",
         name: "",
-        image: null,
+        subcategory_image: null,
         slug: "",
         status: "",
       });
@@ -200,26 +200,26 @@ const AddSubcategory = () => {
 
           {/* Image Upload */}
           <div className="flex flex-col">
-            <label htmlFor="image" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <label htmlFor="subcategory_image" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <Image className="h-4 w-4 text-gray-400" />
               Upload Image
             </label>
             <div className="relative w-full">
               <input
                 type="file"
-                name="image"
-                id="image"
+                name="subcategory_image"
+                id="subcategory_image"
                 accept="image/*"
                 onChange={handleFileChange}
                 className="hidden"
               />
               <label
-                htmlFor="image"
+                htmlFor="subcategory_image"
                 className="flex items-center justify-center w-1/3 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg cursor-pointer shadow-sm hover:bg-white hover:text-black hover:border transition-all duration-200"
               >
                 Choose File
               </label>
-              {formData.image && <p className="mt-2 text-sm text-gray-500">Selected: {formData.image.name}</p>}
+              {formData.subcategory_image && <p className="mt-2 text-sm text-gray-500">Selected: {formData.subcategory_image.name}</p>}
             </div>
           </div>
 

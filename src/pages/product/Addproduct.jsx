@@ -14,7 +14,7 @@ const AddProduct = () => {
     id: null, // For updates
     benefitId: "",
     title: "",
-    image: null,
+    product_image: null,
     location: "",
     price: [
       { months: "3 months", amount: 600 },
@@ -64,7 +64,7 @@ const AddProduct = () => {
         id: productData.id || null,
         benefitId: productData.benefitId || "",
         title: productData.title || "",
-        image: productData.image || null,
+        product_image: productData.product_image || null,
         location: productData.location || "",
         price: productData.price || [
           { months: "3 months", amount: 600 },
@@ -85,7 +85,7 @@ const AddProduct = () => {
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
+    setFormData({ ...formData, product_image: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
@@ -121,8 +121,8 @@ const AddProduct = () => {
       // Convert price array to JSON string
       productData.append("price", JSON.stringify(formData.price));
 
-      if (formData.image && typeof formData.image !== "string") {
-        productData.append("image", formData.image);
+      if (formData.product_image && typeof formData.product_image !== "string") {
+        productData.append("product_image", formData.product_image);
       }
 
       let response;
@@ -154,7 +154,7 @@ const AddProduct = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-
+        console.log(response.data)
         if (response.status === 200 || response.status === 201) {
           toast.success("Product added successfully!", {
             position: "top-right",
@@ -168,7 +168,7 @@ const AddProduct = () => {
         id: null,
         benefitId: "",
         title: "",
-        image: null,
+        product_image: null,
         location: "",
         price: [
           { months: "3 months", amount: 600 },
@@ -258,21 +258,21 @@ const AddProduct = () => {
           <div className="relative w-full">
             <input
               type="file"
-              name="image"
-              id="image"
+              name="product_image"
+              id="product_image"
               accept="image/*"
               onChange={handleFileChange}
               className="hidden"
             />
             <label
-              htmlFor="image"
+              htmlFor="product_image"
               className="flex items-center justify-center w-1/3 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg cursor-pointer shadow-sm hover:bg-white hover:text-black hover:border transition-all duration-200"
             >
               Choose File
             </label>
-            {formData.image && (
+            {formData.product_image && (
               <p className="mt-2 text-sm text-gray-500">
-                Selected: {formData.image.name}
+                Selected: {formData.product_image.name}
               </p>
             )}
           </div>

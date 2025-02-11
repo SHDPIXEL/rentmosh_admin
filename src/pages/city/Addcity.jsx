@@ -9,7 +9,7 @@ const AddCity = () => {
   const [formData, setFormData] = useState({
     id: null, // Ensure ID is tracked for updates
     name: "",
-    image: null,
+    city_image: null,
     slug: "",
     status: "",
   });
@@ -26,7 +26,7 @@ const AddCity = () => {
         name: cityData.name || "",
         slug: cityData.slug || "",
         status: cityData.status || "",
-        image: cityData.image || "",
+        city_image: cityData.city_image || "",
       });
     }
   }, [cityData]);
@@ -42,7 +42,7 @@ const AddCity = () => {
             name: response.data.city.name,
             slug: response.data.city.slug,
             status: response.data.city.status,
-            image: response.data.city.image || null,
+            city_image: response.data.city.city_image || null,
           });
         } catch (error) {
           console.error("Error fetching city:", error);
@@ -59,7 +59,7 @@ const AddCity = () => {
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, image: e.target.files[0] });
+    setFormData({ ...formData, city_image: e.target.files[0] });
   };
 
   const handleSubmit = async (e) => {
@@ -86,8 +86,8 @@ const AddCity = () => {
       }
   
       // Only append image if it's a new file (not an existing URL)
-      if (formData.image && typeof formData.image !== "string") {
-        cityData.append("image", formData.image);
+      if (formData.city_image && typeof formData.city_image !== "string") {
+        cityData.append("city_image", formData.city_image);
       }
   
       let response;
@@ -120,7 +120,7 @@ const AddCity = () => {
       }
   
       // Reset form after success
-      setFormData({ id: "", name: "", image: null, slug: "", status: "" });
+      setFormData({ id: "", name: "", city_image: null, slug: "", status: "" });
     } catch (error) {
       console.error("Error submitting city:", error);
       toast.error(
@@ -164,21 +164,21 @@ const AddCity = () => {
             Choose File
             <input
               type="file"
-              name="image"
-              id="image"
-              accept="image/*"
+              name="city_image"
+              id="city_image"
+              accept="city_image/*"
               onChange={handleFileChange}
               className="hidden"
             />
           </label>
-          {formData.image && typeof formData.image === "string" && (
+          {formData.city_image && typeof formData.city_image === "string" && (
             <p className="text-sm text-gray-500 mt-2">
-              Current: {formData.image}
+              Current: {formData.city_image}
             </p>
           )}
-          {formData.image && formData.image instanceof File && (
+          {formData.city_image && formData.city_image instanceof File && (
             <p className="text-sm text-gray-500 mt-2">
-              Selected: {formData.image.name}
+              Selected: {formData.city_image.name}
             </p>
           )}
         </div>

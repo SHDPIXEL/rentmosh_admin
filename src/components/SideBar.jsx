@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { NavLink } from 'react-router';
+import React, { useState } from "react";
+import RentmoshLogo from "../assets/Rentmosh-logo.png";
+import { Link } from "react-router-dom";
+import { NavLink } from "react-router";
 import {
   Home,
   ClipboardList,
@@ -19,79 +21,98 @@ import {
   UserCheck,
   LogOut,
   Menu,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
 const Sidebar = ({ setIsAuthenticated }) => {
   const [openSubmenus, setOpenSubmenus] = useState({});
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('tokenExpiry')
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("tokenExpiry");
     setIsAuthenticated(false);
-  }
+  };
 
   const menuStructure = [
-    { path: '/dashboard', name: 'Dashboard', icon: Home, type: 'link' },
+    { path: "/dashboard", name: "Dashboard", icon: Home, type: "link" },
     {
-      name: 'City',
+      name: "City",
       icon: Landmark,
-      type: 'submenu',
+      type: "submenu",
       submenuItems: [
-        { path: '/city/list', name: 'City List', icon: Rows3 },
-        { path: '/city/add', name: 'Add city', icon: Plus },
+        { path: "/city/list", name: "City List", icon: Rows3 },
+        { path: "/city/add", name: "Add city", icon: Plus },
       ],
     },
     {
-      name: 'Categories',
+      name: "Categories",
       icon: LayoutGrid,
-      type: 'submenu',
+      type: "submenu",
       submenuItems: [
-        { path: '/categories/list', name: 'Categories List', icon: Rows3 },
-        { path: '/categories/add', name: 'Add Categories', icon: Plus },
+        { path: "/categories/list", name: "Categories List", icon: Rows3 },
+        { path: "/categories/add", name: "Add Categories", icon: Plus },
       ],
     },
     {
-      name: 'Sub-Categories',
+      name: "Sub-Categories",
       icon: Layers,
-      type: 'submenu',
+      type: "submenu",
       submenuItems: [
-        { path: '/sub-Categories/list', name: 'Sub-Categories List', icon: Rows3 },
-        { path: '/sub-Categories/add', name: 'Add Sub-Categories', icon: Plus },
+        {
+          path: "/sub-Categories/list",
+          name: "Sub-Categories List",
+          icon: Rows3,
+        },
+        { path: "/sub-Categories/add", name: "Add Sub-Categories", icon: Plus },
       ],
     },
     {
-      name: 'Benefits',
+      name: "Benefits",
       icon: Gift,
-      type: 'submenu',
+      type: "submenu",
       submenuItems: [
-        { path: '/benefits/list', name: 'Benefits List', icon: Rows3 },
-        { path: '/benefit/add', name: 'Add Benefit', icon: Plus },
+        { path: "/benefits/list", name: "Benefits List", icon: Rows3 },
+        { path: "/benefit/add", name: "Add Benefit", icon: Plus },
       ],
     },
     {
-      name: 'Products',
+      name: "Products",
       icon: Package,
-      type: 'submenu',
+      type: "submenu",
       submenuItems: [
-        { path: '/products/list', name: 'Products List', icon: Rows3 },
-        { path: '/product/add', name: 'Add Product', icon: Plus },
+        { path: "/products/list", name: "Products List", icon: Rows3 },
+        { path: "/product/add", name: "Add Product", icon: Plus },
       ],
     },
-    { path: '/kyclist', name: 'KYC', icon: UserCheck, type: 'link' },
+    { path: "/kyclist", name: "KYC", icon: UserCheck, type: "link" },
     {
-      name: 'Offers',
+      name: "Offers",
       icon: Tag,
-      type: 'submenu',
+      type: "submenu",
       submenuItems: [
-        { path: '/offers/list', name: 'Offers List', icon: Rows3 },
-        { path: '/offer/add', name: 'Add Offer', icon: Plus },
+        { path: "/offers/list", name: "Offers List", icon: Rows3 },
+        { path: "/offer/add", name: "Add Offer", icon: Plus },
       ],
     },
-    { path: '/ordersplaced', name: `Order'${"s"} Placed`, icon: ClipboardList, type: 'link' },
-    { path: '/PaymentList', name: 'Payment Info', icon: CreditCard, type: 'link' },
-    { path: '/customerList', name: `Customer'${"s"}`, icon: Users, type: 'link' },
+    {
+      path: "/ordersplaced",
+      name: `Order'${"s"} Placed`,
+      icon: ClipboardList,
+      type: "link",
+    },
+    {
+      path: "/PaymentList",
+      name: "Payment Info",
+      icon: CreditCard,
+      type: "link",
+    },
+    {
+      path: "/customerList",
+      name: `Customer'${"s"}`,
+      icon: Users,
+      type: "link",
+    },
   ];
 
   const handleSubmenuToggle = (submenuName) => {
@@ -102,15 +123,15 @@ const Sidebar = ({ setIsAuthenticated }) => {
   };
 
   const renderMenuItem = (item) => {
-    if (item.type === 'link') {
+    if (item.type === "link") {
       return (
         <NavLink
           to={item.path}
           className={({ isActive }) =>
             `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-150 ${
               isActive
-                ? 'bg-gray-800 text-white font-medium'
-                : 'text-gray-300 hover:bg-gray-900'
+                ? "bg-[#960b22] text-white font-medium"
+                : "text-black hover:bg-gray-300"
             }`
           }
           onClick={() => setIsSidebarOpen(false)}
@@ -121,12 +142,12 @@ const Sidebar = ({ setIsAuthenticated }) => {
       );
     }
 
-    if (item.type === 'submenu') {
+    if (item.type === "submenu") {
       return (
         <>
           <button
             onClick={() => handleSubmenuToggle(item.name)}
-            className="w-full flex items-center justify-between space-x-3 px-4 py-3 rounded-lg transition-colors duration-150 text-gray-300 hover:bg-gray-900"
+            className="w-full flex items-center justify-between space-x-3 px-4 py-3 rounded-lg transition-colors duration-150 text-black  hover:bg-gray-300"
           >
             <div className="flex items-center space-x-3">
               <item.icon className="w-5 h-5" />
@@ -148,8 +169,8 @@ const Sidebar = ({ setIsAuthenticated }) => {
                     className={({ isActive }) =>
                       `flex items-center space-x-3 px-4 py-2 rounded-lg transition-colors duration-150 ${
                         isActive
-                          ? 'bg-gray-800 text-white font-medium'
-                          : 'text-gray-300 hover:bg-gray-900'
+                          ? "bg-[#960b22] text-white font-medium"
+                          : "text-black hover:bg-gray-300"
                       }`
                     }
                     onClick={() => setIsSidebarOpen(false)}
@@ -173,7 +194,11 @@ const Sidebar = ({ setIsAuthenticated }) => {
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="lg:hidden fixed top-4 right-4 z-50 p-2 text-black"
       >
-        {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isSidebarOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <Menu className="w-6 h-6" />
+        )}
       </button>
 
       {/* Overlay for mobile */}
@@ -186,26 +211,23 @@ const Sidebar = ({ setIsAuthenticated }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-72 h-screen bg-black text-gray-300 flex flex-col flex-shrink-0 text-sm transform transition-transform duration-300 ease-in-out ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed border border-black lg:static inset-y-0 left-0 z-40 w-72 h-screen bg-gray-100 text-gray-300 flex flex-col flex-shrink-0 text-sm transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-700 flex-shrink-0">
-          <h1 className="text-2xl font-bold text-white flex items-center space-x-2">
-            <span className="w-8 h-8 bg-transparent rounded-lg flex items-center justify-center">
-            <span className="text-xl">🏠</span>
-            </span>
-            <span>Rent Mosho</span>
-          </h1>
+        <div className="p-6 border items-center justify-center border-gray-700 bg-gray-100 flex-shrink-0">
+          <Link to="/">
+            <img src={RentmoshLogo} alt="RentMosh Logo" className="w-54 items-center justify-center" />
+          </Link>
         </div>
 
         {/* Navigation Section */}
         <nav className="flex-grow overflow-y-auto p-4">
-          <div className="mb-4 px-4 text-xs font-semibold text-gray-400 uppercase">
+          <div className="mb-4 px-4 text-xs font-semibold text-black uppercase">
             Main Menu
           </div>
-          <ul className="space-y-1">
+          <ul className="space-y-1 text-black">
             {menuStructure.map((item, index) => (
               <li key={item.name || index}>{renderMenuItem(item)}</li>
             ))}
@@ -213,18 +235,18 @@ const Sidebar = ({ setIsAuthenticated }) => {
         </nav>
 
         {/* User Profile Section */}
-        <div className="p-4 border-t border-gray-700 flex-shrink-0">
+        <div className="p-4 border-t border-gray-700 bg-gray-100 border flex-shrink-0">
           <div className="flex items-center space-x-3 px-4 py-3 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center">
-              <span className="text-sm font-medium text-white">RM</span>
+            <div className="w-8 h-8 rounded-full bg-gray-400 flex items-center justify-center">
+              <span className="text-sm font-medium text-black">RM</span>
             </div>
             <div className="flex-grow">
-              <h3 className="text-sm font-medium text-white">Rent Mosho</h3>
-              <p className="text-xs text-gray-400">Admin</p>
+              <h3 className="text-sm font-medium text-black">Rent Mosho</h3>
+              <p className="text-xs text-gray-800">Admin</p>
             </div>
             <button
               onClick={handleLogout}
-              className="hover:bg-gray-900 p-2 rounded-md"
+              className="hover:bg-gray-900 p-2 rounded-md text-black"
             >
               <LogOut className="w-5 h-5" />
             </button>

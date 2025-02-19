@@ -1,10 +1,17 @@
 import React from "react";
 import { BASE_URL } from "../lib/utils"; // Import BASE_URL
 
-const validAccessors = ["images", "city_image", "category_image","subcategory_image","product_image","idProofImage"];
+const validAccessors = [
+  "images",
+  "city_image",
+  "category_image",
+  "subcategory_image",
+  "product_image",
+  "idProofImage",
+];
 
-const Table = ({ columns, data, globalActions }) => {
-  console.log(columns, data);
+const Table = ({ columns, data, globalActions, toggleInStock }) => {
+  console.log(columns, data, toggleInStock);
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse border border-gray-200 bg-white shadow-md rounded-lg md:text-sm text-xs">
@@ -36,7 +43,7 @@ const Table = ({ columns, data, globalActions }) => {
                   key={colIndex}
                   className="px-6 py-4 border-b border-gray-200 text-gray-700"
                 >
-                  {renderCellContent(column, row)}
+                  {renderCellContent(column, row, toggleInStock)}
                 </td>
               ))}
 
@@ -64,8 +71,22 @@ const Table = ({ columns, data, globalActions }) => {
 };
 
 // Helper function to render cell content based on column type
-const renderCellContent = (column, row) => {
+const renderCellContent = (column, row, toggleInStock) => {
   const value = row[column.accessor];
+
+  // Render checkbox for inStock column
+  if (column.accessor === "inStock") {
+    return (
+      <div className="flex justify-center">
+        <input
+          type="checkbox"
+          checked={row.inStock === true}
+          onChange={() => toggleInStock(row)} // This will properly handle the toggle
+          className="w-6 h-6 cursor-pointer rounded-full border-2 border-gray-400 checked:bg-[#960B22] checked:border-[#960B22] checked:accent-[#960B22] focus:ring-0"
+        />
+      </div>
+    );
+  }
 
   // Handle tags
   if (column.accessor === "tags" && Array.isArray(value)) {
@@ -220,7 +241,6 @@ const renderCellContent = (column, row) => {
     // console.log(`No product_image value for column: ${column.accessor}`);
   }
 
-  
   if (column.accessor === "subcategory_image" && value) {
     //console.log("subcategory_image value:", value);
 

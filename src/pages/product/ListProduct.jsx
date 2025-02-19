@@ -79,9 +79,33 @@ const ListProduct = () => {
     });
   };
 
+  const toggleInStock = async (row) => {
+    try {
+      const newInStockValue = !row.inStock;
+      
+      // Send the updated value to the backend (adjust as necessary)
+      await API.put(`/admin/products/${row.id}`, { inStock: newInStockValue });
+  
+      // Update the local state
+      setProducts((prevProducts) =>
+        prevProducts.map((item) =>
+          item.id === row.id ? { ...item, inStock: newInStockValue } : item
+        )
+      );
+  
+      toast.info(`Product is now ${newInStockValue ? "In Stock" : "Out of Stock"}`, {
+        position: "top-right",
+      });
+    } catch (error) {
+      console.error("Error updating inStock status:", error);
+      toast.error("Failed to update inStock status.", { position: "top-right" });
+    }
+  };
+  
   // Table columns
   const columns = [
     { header: "Title", accessor: "title" },
+    { header: "Subcategories", accessor: "subcategoryId" },
     { header: "Benefits", accessor: "benefitId" },
     {
       header: "Image",
@@ -102,6 +126,20 @@ const ListProduct = () => {
     { header: "Material", accessor: "material" },
     { header: "Colour", accessor: "colour" },
     { header: "Status", accessor: "status" },
+    {
+      header: "In Stock",
+      accessor: "inStock",
+      cell: (row) => (
+        <div className="flex justify-center">
+          <input
+            type="checkbox"
+            checked={row.row.original.inStock === true} // Use row.original to access the actual data object
+            onChange={() => toggleInStock(row.row.original)} // Ensure you're passing the correct object to toggleInStock
+            className="w-6 h-6 cursor-pointer rounded-full border-2 border-gray-400 checked:bg-[#960B22] checked:border-[#960B22] checked:accent-[#960B22] focus:ring-0"
+          />
+        </div>
+      ),
+    }
   ];
 
   // Table actions
@@ -146,7 +184,7 @@ const ListProduct = () => {
       </div>
 
       {products.length > 0 ? (
-        <Table columns={columns} data={products} globalActions={actions} />
+        <Table columns={columns} data={products} globalActions={actions}  toggleInStock={toggleInStock} />
       ) : (
         <div className="text-center text-gray-600 mt-10">No products found</div>
       )}

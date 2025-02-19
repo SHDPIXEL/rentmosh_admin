@@ -12,9 +12,10 @@ const AddProduct = () => {
 
   const [formData, setFormData] = useState({
     id: null, // For updates
+    subcategoryId: "",
     benefitId: "",
     title: "",
-    product_image: null,
+    product_image: [],
     location: "",
     price: [
       { months: "3 months", amount: 600 },
@@ -25,9 +26,11 @@ const AddProduct = () => {
     material: "",
     colour: "",
     status: "",
+    inStock: true, // Added inStock with a default value of true
   });
 
   const [benefits, setbenefits] = useState([]);
+  const [subcategories, setsubcategories] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state to show a loading indicator
 
   useEffect(() => {
@@ -56,12 +59,39 @@ const AddProduct = () => {
     fetchBenefits();
   }, []);
 
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      try {
+        const response = await API.get("/admin/subcategories");
+        console.log("API Response:", response.data.subcategories); // Log the API response for debugging
+
+        if (
+          response.data.subcategories &&
+          response.data.subcategories &&
+          response.data.subcategories.length > 0
+        ) {
+          setsubcategories(response.data.subcategories);
+        } else {
+          toast.error("No subcategories found.", { position: "top-right" });
+        }
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        toast.error("Failed to load subcategories.", { position: "top-right" });
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    fetchSubcategories();
+  }, []);
+
   // Pre-fill data if we're editing an existing subcategory
   useEffect(() => {
     if (location.state?.productData) {
       const productData = location.state.productData;
       setFormData({
         id: productData.id || null,
+        subcategoryId: productData.subcategoryId || "",
         benefitId: productData.benefitId || "",
         title: productData.title || "",
         product_image: productData.product_image || null,
@@ -75,6 +105,7 @@ const AddProduct = () => {
         material: productData.material || "",
         colour: productData.colour || "",
         status: productData.status || "",
+        inStock: productData.inStock !== undefined ? productData.inStock : true, // Added inStock with default value
       });
     }
   }, [location.state]);
@@ -84,21 +115,55 @@ const AddProduct = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleFileChange = (e) => {
-    setFormData({ ...formData, product_image: e.target.files[0] });
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+
+    if (files.length === 0) return;
+
+    // Ensure previous images remain, and filter out previews to avoid duplicates
+    const existingImages = Array.isArray(formData.product_image)
+      ? formData.product_image.filter((img) => !img.preview)
+      : [];
+
+    // Limit to 5 images
+    if (existingImages.length + files.length > 5) {
+      toast.error("You can only upload up to 5 images.", {
+        position: "top-right",
+      });
+      return;
+    }
+
+    // Convert selected files into preview objects
+    const newImages = files.slice(0, 5 - existingImages.length).map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+    }));
+
+    setFormData((prev) => ({
+      ...prev,
+      product_image: [...existingImages, ...newImages], // Preserve previous valid images
+    }));
+  };
+
+  const handleDeleteImage = (indexToDelete) => {
+    setFormData((prev) => ({
+      ...prev,
+      product_image: prev.product_image.filter(
+        (_, index) => index !== indexToDelete
+      ),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
     if (
+      !formData.subcategoryId ||
       !formData.benefitId ||
       !formData.title ||
-      !formData.location ||
-      !formData.price.length
+      !formData.location
     ) {
-      toast.error("Benefit, Title, Location, and Price are required fields.", {
+      toast.error("Subcategory, Benefit, Title, and Location are required.", {
         position: "top-right",
       });
       return;
@@ -109,6 +174,7 @@ const AddProduct = () => {
       if (!token) throw new Error("Authorization token is missing");
 
       const productData = new FormData();
+      productData.append("subcategoryId", formData.subcategoryId);
       productData.append("benefitId", formData.benefitId);
       productData.append("title", formData.title);
       productData.append("location", formData.location);
@@ -121,14 +187,25 @@ const AddProduct = () => {
       // Convert price array to JSON string
       productData.append("price", JSON.stringify(formData.price));
 
-      if (formData.product_image && typeof formData.product_image !== "string") {
-        productData.append("product_image", formData.product_image);
+      // Append inStock as a boolean value
+      productData.append(
+        "inStock",
+        formData.inStock !== undefined ? formData.inStock : true
+      );
+
+      // Append images (only files, not preview URLs)
+      if (formData.product_image && formData.product_image.length > 0) {
+        formData.product_image.forEach((imgObj) => {
+          if (imgObj.file) {
+            productData.append("product_image", imgObj.file);
+          }
+        });
       }
 
       let response;
 
       if (formData.id) {
-        // **Update existing product (PUT)**
+        // Update product
         response = await API.put(
           `/admin/products/${formData.id}`,
           productData,
@@ -147,15 +224,15 @@ const AddProduct = () => {
           setTimeout(() => navigate("/products/list"), 1000);
         }
       } else {
-        // **Create new product (POST)**
+        // Create new product
         response = await API.post("/admin/products", productData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         });
-        console.log(response.data)
-        if (response.status === 200 || response.status === 201) {
+
+        if (response.status === 201) {
           toast.success("Product added successfully!", {
             position: "top-right",
           });
@@ -163,12 +240,13 @@ const AddProduct = () => {
         }
       }
 
-      // Reset form after success
+      // Reset form
       setFormData({
         id: null,
+        subcategoryId: "",
         benefitId: "",
         title: "",
-        product_image: null,
+        product_image: [], // Clear images after successful submission
         location: "",
         price: [
           { months: "3 months", amount: 600 },
@@ -179,6 +257,7 @@ const AddProduct = () => {
         material: "",
         colour: "",
         status: "",
+        inStock: true, // Reset inStock to true by default
       });
     } catch (error) {
       console.error("Error submitting product:", error);
@@ -200,6 +279,32 @@ const AddProduct = () => {
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Add Product</h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+        {/* Subcategory ID */}
+        <div className="flex flex-col">
+          <label
+            htmlFor="subcategoryId"
+            className="text-sm flex font-medium text-gray-700 mb-2"
+          >
+            <Info className="h-4 mr-2 w-4 text-gray-400" />
+            Select Subcategory
+          </label>
+          <select
+            name="subcategoryId"
+            id="subcategoryId"
+            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
+            value={formData.subcategoryId}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select Subcategory</option>
+            {subcategories.map((subcategory) => (
+              <option key={subcategory.id} value={subcategory.id}>
+                {subcategory.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Benefit ID */}
         <div className="flex flex-col">
           <label
@@ -246,36 +351,56 @@ const AddProduct = () => {
           />
         </div>
 
-        {/* Image Upload */}
         <div className="flex flex-col">
           <label
-            htmlFor="image"
+            htmlFor="product_image"
             className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
           >
             <Image className="h-4 w-4 text-gray-400" />
-            Upload Image
+            Upload Images
+            {formData.product_image?.length > 0 && (
+              <span className="text-gray-500 text-xs italic">
+                (Upload a new image only if you wish to update)
+              </span>
+            )}
           </label>
-          <div className="relative w-full">
+
+          {/* Image File Input */}
+          <label className="p-3 bg-black rounded-lg cursor-pointer text-center text-white hover:bg-white hover:border hover:border-gray-800 hover:text-black font-medium w-1/3 transition-all">
+            Choose File
             <input
               type="file"
               name="product_image"
               id="product_image"
               accept="image/*"
-              onChange={handleFileChange}
+              onChange={handleImageChange}
               className="hidden"
+              multiple
             />
-            <label
-              htmlFor="product_image"
-              className="flex items-center justify-center w-1/3 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg cursor-pointer shadow-sm hover:bg-white hover:text-black hover:border transition-all duration-200"
-            >
-              Choose File
-            </label>
-            {formData.product_image && (
-              <p className="mt-2 text-sm text-gray-500">
-                Selected: {formData.product_image.name}
-              </p>
+          </label>
+          {/* Display selected image previews */}
+          {Array.isArray(formData.product_image) &&
+            formData.product_image.length > 0 && (
+              <div className="mt-3 flex gap-3 flex-wrap">
+                {formData.product_image.map((image, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={image.preview || URL.createObjectURL(image.file)}
+                      alt={`Preview ${index + 1}`}
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                    {/* Optionally, add delete button for new images */}
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteImage(index)}
+                      className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                    >
+                      &times;
+                    </button>
+                  </div>
+                ))}
+              </div>
             )}
-          </div>
         </div>
 
         {/* Location */}

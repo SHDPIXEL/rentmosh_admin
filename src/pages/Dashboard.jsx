@@ -56,6 +56,33 @@ const Dashboard = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesRes, subcategoriesRes, productsRes, usersRes] = await Promise.all([
+          API.get("/admin/categories").catch((err) => err.response?.status === 404 ? { data: [] } : Promise.reject(err)), 
+          API.get("/admin/subcategories").catch((err) => err.response?.status === 404 ? { data: { subcategories: [] } } : Promise.reject(err)),
+          API.get("/admin/products").catch((err) => err.response?.status === 404 ? { data: { products: [] } } : Promise.reject(err)),
+          API.get("/admin/users").catch((err) => err.response?.status === 404 ? { data: { users: [] } } : Promise.reject(err)),
+        ]);
+  
+        setTotalCategories(categoriesRes.data.length || 0);
+        setTotalSubcategories(subcategoriesRes.data.subcategories?.length || 0);
+        setTotalProducts(productsRes.data.products?.length || 0);
+        setTotalUsers(usersRes.data.users?.length || 0);
+      } catch (err) {
+        console.error("API Fetch Error:", err);
+        setError("Failed to fetch dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+  
+
+
   const bookingChartData = [
     { date: "2023-12-01", bookings: 30 },
     { date: "2023-12-02", bookings: 45 },

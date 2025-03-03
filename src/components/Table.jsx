@@ -105,50 +105,42 @@ const renderCellContent = (column, row, toggleInStock) => {
   }
 
   // Handle images (for city_image column)
-  // console.log("Column accessor:", column.accessor);
   if (column.accessor === "city_image" && value) {
-    // console.log("city_image value:", value);
-
     let imageArray = [];
 
     try {
-      // Check if value is a string and looks like a JSON array
+      // Check if value is a JSON string (array) or a single string (file path)
       if (typeof value === "string") {
-        // console.log("Raw city_image string value before cleaning:", value);
-        const cleanedValue = value.replace(/\\"/g, '"').replace(/^"|"$/g, ""); // Remove extra quotes
-        // console.log("Cleaned city_image string:", cleanedValue);
-        imageArray = JSON.parse(cleanedValue);
-      } else {
-        imageArray = value; // If it's already an array, use it directly
+        // console.log("Raw city_image string value before processing:", value);
+
+        // If the value looks like a JSON array, parse it
+        if (value.startsWith("[") && value.endsWith("]")) {
+          imageArray = JSON.parse(value);
+        } else {
+          // If it's a single string, wrap it in an array
+          imageArray = [value];
+        }
+      } else if (Array.isArray(value)) {
+        // If it's already an array, use it directly
+        imageArray = value;
       }
     } catch (error) {
       console.error("Error parsing city_image value:", error);
     }
 
     // console.log("Parsed city_image imageArray:", imageArray);
-    // console.log(
-    //   "Type of city_image imageArray:",
-    //   Array.isArray(imageArray) ? "Array" : "Not Array"
-    // );
 
     if (Array.isArray(imageArray) && imageArray.length > 0) {
       const imageUrl = `${BASE_URL}/${imageArray[0]}`; // Use the first image in the array
-      // console.log("city_image imageUrl:", imageUrl);
       return (
-        <>
-          <img
-            key="1"
-            src={imageUrl}
-            alt={`city_image`}
-            className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
-          />
-        </>
+        <img
+          key="1"
+          src={imageUrl}
+          alt="city_image"
+          className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
+        />
       );
-    } else {
-      // console.log("No images found in city_image array or array is empty.");
     }
-  } else {
-    // console.log(`No city_image value for column: ${column.accessor}`);
   }
 
   if (column.accessor === "category_image" && value) {

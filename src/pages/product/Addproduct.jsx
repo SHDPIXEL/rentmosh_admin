@@ -31,6 +31,7 @@ const AddProduct = () => {
 
   const [benefits, setbenefits] = useState([]);
   const [subcategories, setsubcategories] = useState([]);
+  const [cities, setCities] = useState([]); // Store fetched cities
   const [loading, setLoading] = useState(true); // Loading state to show a loading indicator
 
   useEffect(() => {
@@ -56,7 +57,26 @@ const AddProduct = () => {
       }
     };
 
+    const fetchCities = async () => {
+      try {
+        const response = await API.get("/admin/cities"); // Replace with actual endpoint
+        console.log("Cities API Response:", response.data.cities);
+
+        if (response.data.cities && response.data.cities.length > 0) {
+          setCities(response.data.cities);
+        } else {
+          toast.error("No cities found.", { position: "top-right" });
+        }
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+        toast.error("Failed to load cities.", { position: "top-right" });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBenefits();
+    fetchCities();
   }, []);
 
   useEffect(() => {
@@ -193,13 +213,18 @@ const AddProduct = () => {
         formData.inStock !== undefined ? formData.inStock : true
       );
 
-      // Append images (only files, not preview URLs)
-      if (formData.product_image && formData.product_image.length > 0) {
+      if (
+        Array.isArray(formData.product_image) &&
+        formData.product_image.length > 0
+      ) {
         formData.product_image.forEach((imgObj) => {
           if (imgObj.file) {
             productData.append("product_image", imgObj.file);
           }
         });
+      } else if (formData.product_image?.file) {
+        // If it's a single object instead of an array
+        productData.append("product_image", formData.product_image.file);
       }
 
       let response;
@@ -403,24 +428,29 @@ const AddProduct = () => {
             )}
         </div>
 
-        {/* Location */}
-        <div className="flex flex-col">
+        {/* Location (City Selection) */}
+        <div className="flex flex-col mt-4">
           <label
             htmlFor="location"
             className="text-sm font-medium text-gray-700 mb-2"
           >
-            Location
+            Select Location
           </label>
-          <input
-            type="text"
+          <select
             name="location"
             id="location"
+            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
             value={formData.location}
             onChange={handleChange}
-            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
-            placeholder="Enter Location"
             required
-          />
+          >
+            <option value="">Select Location</option>
+            {cities.map((city) => (
+              <option key={city.id} value={city.name}>
+                {city.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Price (Months) */}

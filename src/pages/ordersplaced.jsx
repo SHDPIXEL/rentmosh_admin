@@ -1,33 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "../components/Table";
-import { SquarePen, Trash2, RefreshCcw } from "lucide-react";
+import { SquarePen, CheckCircle, RefreshCcw } from "lucide-react";
 import { useNavigate } from "react-router";
 import { Helmet } from "react-helmet-async";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import API from "../lib/utils";
 
 const ListOrder = () => {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
 
-  // Static order data
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      allorders: "50",
-      kycpending: "5",
-      activeorders: "30",
-      inactiveorders: "10",
-      failedorders: "5",
-    },
-    {
-      id: 2,
-      allorders: "80",
-      kycpending: "2",
-      activeorders: "60",
-      inactiveorders: "15",
-      failedorders: "3",
-    },
-  ]);
+  // Fetch Customers Data
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await API.get("/admin/orders");
+        console.log(response.data.orders); // Debugging log
+        setOrders(response.data.orders);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        toast.error("Failed to fetch customer data.", {
+          position: "top-right",
+        });
+      }
+    };
+    fetchOrders();
+  }, []);
 
   // Custom confirmation toast
   const confirmAction = (message, onConfirm) => {
@@ -56,51 +55,98 @@ const ListOrder = () => {
     );
   };
 
-  // Delete order
-  const deleteOrder = (id) => {
-    confirmAction("Are you sure you want to delete this order?", () => {
-      setOrders((prev) => prev.filter((item) => item.id !== id));
-      toast.success("Order deleted successfully!", { position: "top-right" });
-    });
+  const markOrderAsProcessing = async (row) => {
+    updateOrderStatus(row, "Processing");
   };
 
-  // Toggle order status
-  const updateStatus = (row) => {
-    confirmAction("Are you sure you want to change the status?", () => {
-      // Example: Here you could toggle the order status between active and inactive, or any other logic.
-      const newStatus = row.activeorders > 0 ? "Inactive" : "Active";
-      setOrders((prev) =>
-        prev.map((item) => (item.id === row.id ? { ...item, status: newStatus } : item))
+  const markOrderAsDelivered = async (row) => {
+    updateOrderStatus(row, "Delivered");
+  };
+
+  const updateOrderStatus = async (row, newStatus) => {
+    confirmAction(
+      `Are you sure you want to update the status to ${newStatus}?`,
+      async () => {
+        try {
+          const response = await API.put(`/admin/orders/${row.id}/status`, {
+            orderStatus: newStatus,
+          });
+
+          if (response.data.success) {
+            setOrders((prevOrders) =>
+              prevOrders.map((order) =>
+                order.id === row.id
+                  ? { ...order, orderStatus: newStatus }
+                  : order
+              )
+            );
+            toast.success(`Order status updated to ${newStatus}`, {
+              position: "top-right",
+            });
+          } else {
+            toast.error("Failed to update order status.", {
+              position: "top-right",
+            });
+          }
+        } catch (error) {
+          console.error("Error updating order status:", error);
+          toast.error("Error updating order status.", {
+            position: "top-right",
+          });
+        }
+      }
+    );
+  };
+
+  const handleDownloadInvoice = async (userId, orderId) => {
+    try {
+      const response = await API.get(`/admin/invoice/${userId}/${orderId}`, {
+        responseType: "blob", // Ensures it handles files correctly
+      });
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `invoice-${userId}-${orderId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error(
+        "Error downloading invoice:",
+        error.response?.data || error.message 
       );
-      toast.info(`Status changed to ${newStatus}!`, { position: "top-right" });
-    });
+      toast.error("Invoice not found or server error.");
+    }
   };
 
   // Table columns
   const columns = [
-    { header: "All Orders", accessor: "allorders" },
-    { header: "KYC Pending", accessor: "kycpending" },
-    { header: "Active Orders", accessor: "activeorders" },
-    { header: "Inactive Orders", accessor: "inactiveorders" },
-    { header: "Failed Orders", accessor: "failedorders" },
+    { header: "OrderId", accessor: "orderId" },
+    { header: "Date", accessor: "date" },
+    { header: "User Name", accessor: "User.name" },
+    { header: "User Email", accessor: "User.email" },
+    { header: "User Phone", accessor: "User.phone" },
+    { header: "ProductId", accessor: "Product.title" },
+    { header: "Full Address", accessor: "fullAddress" },
+    { header: "KycId", accessor: "KYC.status" },
+    { header: "Order Status", accessor: "orderStatus" },
+    { header: "Payment Method", accessor: "paymentMethod" },
+    { header: "Download Invoice", accessor: "download" },
   ];
 
-  // Table actions
   const actions = [
     {
-      label: <SquarePen className="w-4 h-4" />,
-      handler: (row) => navigate("/order/edit", { state: { orderData: row } }),
-      className: "text-green-500 hover:text-green-600",
-    },
-    {
-      label: <Trash2 className="w-4 h-4" />,
-      handler: (row) => deleteOrder(row.id),
-      className: "text-red-500 hover:text-red-600",
-    },
-    {
       label: <RefreshCcw className="w-4 h-4" />,
-      handler: (row) => updateStatus(row),
+      handler: (row) => markOrderAsProcessing(row), // ✅ Mark as Processing
       className: "text-blue-500 hover:text-blue-600",
+    },
+    {
+      label: <CheckCircle className="w-4 h-4" />,
+      handler: (row) => markOrderAsDelivered(row), // ✅ Mark as Delivered
+      className: "text-green-500 hover:text-green-600",
     },
   ];
 
@@ -112,8 +158,13 @@ const ListOrder = () => {
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Order List</h1>
 
-      {orders.length > 0 ? (
-        <Table columns={columns} data={orders} globalActions={actions} />
+      {orders?.length > 0 ? (
+        <Table
+          columns={columns}
+          data={orders}
+          globalActions={actions}
+          downloadInvoice={handleDownloadInvoice}
+        />
       ) : (
         <div className="text-center text-gray-600 mt-10">No orders found</div>
       )}

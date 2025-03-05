@@ -10,7 +10,6 @@ import AddCity from "./pages/city/Addcity";
 import ListCity from "./pages/city/Listcity";
 import AddCategory from "./pages/category/Addcategory";
 import ListCategory from "./pages/category/Listcategory";
-import PaymentList from "./pages/PaymentList";
 import AddSubCategory from "./pages/subCategory/Add";
 import ListSubCategory from "./pages/subCategory/List";
 import AddBenefit from "./pages/benefit/Addbenefit";
@@ -67,7 +66,6 @@ function App() {
             <Route path="categories/add" element={<AddCategory />} />
             <Route path="city/list" element={<ListCity />} />
             <Route path="city/add" element={<AddCity />} />
-            <Route path="paymentlist" element={<PaymentList />} />
             <Route path="sub-Categories/list" element={<ListSubCategory />} />
             <Route path="sub-Categories/add" element={<AddSubCategory />} />
             <Route path="benefits/list" element={<ListBenefit />} />

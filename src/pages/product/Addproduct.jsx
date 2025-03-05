@@ -452,7 +452,7 @@ const AddProduct = () => {
             ))}
           </select>
         </div>
-
+            
         {/* Price (Months) */}
         <div className="flex flex-col">
           <label

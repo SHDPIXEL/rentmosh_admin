@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useState} from "react";
+import { Download, Loader } from "lucide-react";
 import { BASE_URL } from "../lib/utils"; // Import BASE_URL
 
 const validAccessors = [
@@ -10,8 +11,9 @@ const validAccessors = [
   "idProofImage",
 ];
 
-const Table = ({ columns, data, globalActions, toggleInStock }) => {
+const Table = ({ columns, data, globalActions, toggleInStock,downloadInvoice }) => {
   console.log(columns, data, toggleInStock);
+  console.log("Table Data:", data);
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse border border-gray-200 bg-white shadow-md rounded-lg md:text-sm text-xs">
@@ -43,7 +45,7 @@ const Table = ({ columns, data, globalActions, toggleInStock }) => {
                   key={colIndex}
                   className="px-6 py-4 border-b border-gray-200 text-gray-700"
                 >
-                  {renderCellContent(column, row, toggleInStock)}
+                  {renderCellContent(column, row, toggleInStock,downloadInvoice)}
                 </td>
               ))}
 
@@ -71,8 +73,63 @@ const Table = ({ columns, data, globalActions, toggleInStock }) => {
 };
 
 // Helper function to render cell content based on column type
-const renderCellContent = (column, row, toggleInStock) => {
+const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
   const value = row[column.accessor];
+
+  if (column.accessor === "User.name") {
+    return <span>{row.User?.name || "N/A"}</span>;
+  }
+
+  if (column.accessor === "User.email") {
+    return <span>{row.User?.email || "N/A"}</span>;
+  }
+
+  if (column.accessor === "User.phone") {
+    return <span>{row.User?.phone || "N/A"}</span>;
+  }
+  if (column.accessor === "Product.title") {
+    return <span>{row.Product?.title || "N/A"}</span>;
+  }
+  if (column.accessor === "KYC.status") {
+    return <span>{row.KYC?.status || "N/A"}</span>;
+  }
+  if (column.accessor === "Address.fullAddress") {
+    return <span>{row.Address?.address || "N/A"}</span>;
+  }
+  if (column.accessor === "Address.nearestLandmark") {
+    return <span>{row.Address?.nearestLandmark || "N/A"}</span>;
+  }
+  if (column.accessor === "Address.city") {
+    return <span>{row.Address?.city || "N/A"}</span>;
+  }
+  if (column.accessor === "Address.state") {
+    return <span>{row.Address?.state || "N/A"}</span>;
+  }
+  if (column.accessor === "Address.postalCode") {
+    return <span>{row.Address?.postalCode || "N/A"}</span>;
+  }
+  if (column.accessor === "date") {
+    const dateObj = new Date(row.date);
+    const formattedDate = dateObj.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    let formattedTime = dateObj.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true, // Ensures AM/PM format
+      timeZone: "Asia/Kolkata",
+    });
+
+    formattedTime = formattedTime.replace(/(am|pm)/i, (match) =>
+      match.toUpperCase()
+    );
+
+    return <span>{`${formattedDate} ${formattedTime}`}</span>;
+  }
 
   // Render checkbox for inStock column
   if (column.accessor === "inStock") {
@@ -87,6 +144,20 @@ const renderCellContent = (column, row, toggleInStock) => {
       </div>
     );
   }
+
+    // Handle download button for invoice
+    if (column.accessor === "download") {
+      return (
+        <div className="flex justify-center items-center">
+          <DownloadButton
+            downloadInvoice={downloadInvoice}
+            userId={row.User?.id}
+            orderId={row.orderId}
+          />
+        </div>
+      );
+    }
+  
 
   // Handle tags
   if (column.accessor === "tags" && Array.isArray(value)) {
@@ -339,6 +410,31 @@ const renderCellContent = (column, row, toggleInStock) => {
   }
 
   return value || "N/A"; // Fallback if value is null or undefined
+};
+
+const DownloadButton = ({ downloadInvoice, userId, orderId }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    await downloadInvoice(userId, orderId);
+    setLoading(false);
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className="text-blue-500 hover:text-blue-700 flex justify-center text-center items-center"
+      title="Download Invoice"
+      disabled={loading}
+    >
+      {loading ? (
+        <Loader size={20} className="animate-spin" />
+      ) : (
+        <Download size={20} />
+      )}
+    </button>
+  );
 };
 
 export default Table;

@@ -23,6 +23,7 @@ const Dashboard = () => {
   const [totalSubcategories, setTotalSubcategories] = useState(0);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [ordersGraph, setOrdersGraph] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -80,18 +81,26 @@ const Dashboard = () => {
   
     fetchData();
   }, []);
-  
 
+  useEffect(() => {
+    const fetchBookingChartData = async () => {
+      const response = await API.get("/admin/orders-graph");
+      console.log(response.data.data)
+      const data = response.data.data;
+      setOrdersGraph(data);
+    }
+    fetchBookingChartData()
+  },[])
 
-  const bookingChartData = [
-    { date: "2023-12-01", bookings: 30 },
-    { date: "2023-12-02", bookings: 45 },
-    { date: "2023-12-03", bookings: 60 },
-    { date: "2023-12-04", bookings: 25 },
-    { date: "2023-12-05", bookings: 75 },
-    { date: "2023-12-06", bookings: 50 },
-    { date: "2023-12-07", bookings: 90 },
-  ];
+  // const bookingChartData = [
+  //   { date: "2023-12-01", bookings: 30 },
+  //   { date: "2023-12-02", bookings: 45 },
+  //   { date: "2023-12-03", bookings: 60 },
+  //   { date: "2023-12-04", bookings: 25 },
+  //   { date: "2023-12-05", bookings: 75 },
+  //   { date: "2023-12-06", bookings: 50 },
+  //   { date: "2023-12-07", bookings: 90 },
+  // ];
 
   const UserAgentPieCharData = [
     { name: "User", value: totalUsers },
@@ -105,15 +114,15 @@ const Dashboard = () => {
 
   const COLORS = ["#0088FE", "#00C49F"];
 
-  const LinechartData = [
-    { date: "2023-12-01", bookings: 30 },
-    { date: "2023-12-02", bookings: 45 },
-    { date: "2023-12-03", bookings: 60 },
-    { date: "2023-12-04", bookings: 25 },
-    { date: "2023-12-05", bookings: 75 },
-    { date: "2023-12-06", bookings: 50 },
-    { date: "2023-12-07", bookings: 90 },
-  ];
+  // const LinechartData = [
+  //   { date: "2023-12-01", bookings: 30 },
+  //   { date: "2023-12-02", bookings: 45 },
+  //   { date: "2023-12-03", bookings: 60 },
+  //   { date: "2023-12-04", bookings: 25 },
+  //   { date: "2023-12-05", bookings: 75 },
+  //   { date: "2023-12-06", bookings: 50 },
+  //   { date: "2023-12-07", bookings: 90 },
+  // ];
 
   const DashboardItems = [
     { title: "Total Categories", value: totalCategories, icon: <LayoutGrid className="w-5 h-5" /> },
@@ -153,7 +162,7 @@ const Dashboard = () => {
         <div className="h-80 flex flex-col items-center justify-center shadow-sm bg-white p-6 space-y-5">
           <ResponsiveContainer>
             <LineChart
-              data={LinechartData}
+              data={ordersGraph}
               margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -177,7 +186,7 @@ const Dashboard = () => {
               <Legend wrapperStyle={{ color: "#333" }} />
               <Line
                 type="monotone"
-                dataKey="booking"
+                dataKey="orders"
                 stroke="#00C49F"
                 strokeWidth={2}
                 activeDot={{ r: 10 }}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Info, FileText, Hash, ToggleRight } from "lucide-react";
+import { Info, FileText, Hash, ToggleRight,Percent } from "lucide-react";
 import { toast, ToastContainer } from "react-toastify";
 import { useLocation, useNavigate } from "react-router-dom";
 import API from "../../lib/utils"; // Ensure API is configured properly
@@ -11,6 +11,7 @@ const AddOffer = () => {
     name: "",
     description: "",
     code: "",
+    discount: "",
     status: "",
   });
 
@@ -26,6 +27,7 @@ const AddOffer = () => {
         name: offerData.name || "",
         description: offerData.description || "",
         code: offerData.code || "",
+        discount: offerData.discount || "",
         status: offerData.status || "",
       });
     }
@@ -41,6 +43,7 @@ const AddOffer = () => {
             name: response.data.offer.name,
             description: response.data.offer.description,
             code: response.data.offer.code,
+            discount: response.data.offer.discount || "",
             status: response.data.offer.status,
           });
         } catch (error) {
@@ -54,6 +57,17 @@ const AddOffer = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+    // // Ensure discount remains within 0 - 100 range
+    // if (name === "discount") {
+    //   const discountValue = parseFloat(value);
+    //   if (discountValue < 0 || discountValue > 100) {
+    //     toast.error("Discount must be between 0% and 100%", {
+    //       position: "top-right",
+    //     });
+    //     return;
+    //   }
+    // }
     setFormData({ ...formData, [name]: value });
   };
 
@@ -81,13 +95,22 @@ const AddOffer = () => {
 
       if (response.status === 200 || response.status === 201) {
         toast.success(
-          formData.id ? "Offer updated successfully!" : "Offer added successfully!",
+          formData.id
+            ? "Offer updated successfully!"
+            : "Offer added successfully!",
           { position: "top-right" }
         );
         setTimeout(() => navigate("/offers/list"), 1000);
       }
 
-      setFormData({ id: "", name: "", description: "", code: "", status: "" });
+      setFormData({
+        id: "",
+        name: "",
+        description: "",
+        code: "",
+        discount: "",
+        status: "",
+      });
     } catch (error) {
       console.error("Error submitting offer:", error);
       toast.error(error.response?.data?.message || "Error processing offer.", {
@@ -150,6 +173,24 @@ const AddOffer = () => {
           />
         </div>
 
+        {/* Discount */}
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+            <Percent className="h-4 w-4 text-gray-400" /> Discount (%)
+          </label>
+          <input
+            type="number"
+            name="discount"
+            placeholder="Enter Discount Percentage"
+            value={formData.discount}
+            onChange={handleChange}
+            className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min="0"
+            max="100"
+            required
+          />
+        </div>
+
         {/* Status */}
         <div className="flex flex-col">
           <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
@@ -162,7 +203,9 @@ const AddOffer = () => {
             className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
-            <option value="" disabled>Select Status</option>
+            <option value="" disabled>
+              Select Status
+            </option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
           </select>

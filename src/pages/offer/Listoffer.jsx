@@ -92,6 +92,7 @@ const ListOffer = () => {
     { header: "Offer Name", accessor: "name" },
     { header: "Description", accessor: "description" },
     { header: "Code", accessor: "code" },
+    { header: "Discount", accessor: "discount" },
     { header: "Status", accessor: "status" },
   ];
 

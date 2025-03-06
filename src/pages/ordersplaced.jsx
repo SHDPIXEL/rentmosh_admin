@@ -129,7 +129,7 @@ const ListOrder = () => {
     { header: "User Name", accessor: "User.name" },
     { header: "User Email", accessor: "User.email" },
     { header: "User Phone", accessor: "User.phone" },
-    { header: "ProductId", accessor: "Product.title" },
+    { header: "Product Name", accessor: "product.title" },
     { header: "Full Address", accessor: "fullAddress" },
     { header: "KycId", accessor: "KYC.status" },
     { header: "Order Status", accessor: "orderStatus" },

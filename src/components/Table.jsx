@@ -87,8 +87,8 @@ const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
   if (column.accessor === "User.phone") {
     return <span>{row.User?.phone || "N/A"}</span>;
   }
-  if (column.accessor === "Product.title") {
-    return <span>{row.Product?.title || "N/A"}</span>;
+  if (column.accessor === "product.title") {
+    return <span>{row.product?.title || "N/A"}</span>;
   }
   if (column.accessor === "KYC.status") {
     return <span>{row.KYC?.status || "N/A"}</span>;
@@ -131,6 +131,29 @@ const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
     return <span>{`${formattedDate} ${formattedTime}`}</span>;
   }
 
+  if (column.accessor === "createdAt") {
+    const dateObj = new Date(row.createdAt);
+    const formattedDate = dateObj.toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  
+    let formattedTime = dateObj.toLocaleTimeString("en-IN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true, // Ensures AM/PM format
+      timeZone: "Asia/Kolkata",
+    });
+  
+    formattedTime = formattedTime.replace(/(am|pm)/i, (match) =>
+      match.toUpperCase()
+    );
+  
+    return <span>{`${formattedDate} ${formattedTime}`}</span>;
+  }
+  
   // Render checkbox for inStock column
   if (column.accessor === "inStock") {
     return (

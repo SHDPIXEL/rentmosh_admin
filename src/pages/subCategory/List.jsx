@@ -16,7 +16,7 @@ const ListSubcategories = () => {
     const fetchSubcategories = async () => {
       try {
         const response = await API.get("/admin/subcategories");
-        console.log(response.data.subcategories);
+        console.log("sub",response.data.subcategories);
         setSubcategories(response.data.subcategories);
       } catch (error) {
         console.error("Error fetching subcategories:", error);
@@ -123,6 +123,7 @@ const ListSubcategories = () => {
   // Table columns
   const columns = [
     { header: "Subcategory Name", accessor: "name" },
+    { header: "Category Name", accessor: "category.name" },
     {
       header: "Image",
       accessor: "subcategory_image",

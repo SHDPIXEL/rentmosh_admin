@@ -235,7 +235,7 @@ const Sidebar = ({ setIsAuthenticated }) => {
               <span className="text-sm font-medium text-gray-300">RM</span>
             </div>
             <div className="flex-grow">
-              <h3 className="text-sm font-medium text-black">Rent Mosho</h3>
+              <h3 className="text-sm font-medium text-black">RentMosh</h3>
               <p className="text-xs text-gray-800">Admin</p>
             </div>
             <button

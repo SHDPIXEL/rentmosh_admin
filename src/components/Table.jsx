@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import { Download, Loader } from "lucide-react";
 import { BASE_URL } from "../lib/utils"; // Import BASE_URL
 
@@ -11,8 +11,15 @@ const validAccessors = [
   "idProofImage",
 ];
 
-const Table = ({ columns, data, globalActions, toggleInStock,downloadInvoice }) => {
-  console.log(columns, data, toggleInStock);
+const Table = ({
+  columns,
+  data,
+  globalActions,
+  toggleInStock,
+  downloadInvoice,
+  markOrderAsDelivered,
+}) => {
+  console.log(columns, data, toggleInStock, markOrderAsDelivered);
   console.log("Table Data:", data);
   return (
     <div className="overflow-x-auto">
@@ -33,39 +40,77 @@ const Table = ({ columns, data, globalActions, toggleInStock,downloadInvoice }) 
 
         {/* Table Body */}
         <tbody>
-          {data.map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              className={`hover:bg-gray-50 ${
-                rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"
-              }`}
-            >
-              {columns.map((column, colIndex) => (
-                <td
-                  key={colIndex}
-                  className="px-6 py-4 border-b border-gray-200 text-gray-700"
-                >
-                  {renderCellContent(column, row, toggleInStock,downloadInvoice)}
-                </td>
-              ))}
+          {[...data].reverse().map(
+            (
+              row,
+              rowIndex // Reverse data here
+            ) => (
+              <tr
+                key={rowIndex}
+                className={`hover:bg-gray-50 ${
+                  rowIndex % 2 === 0 ? "bg-gray-50" : "bg-white"
+                }`}
+              >
+                {columns.map((column, colIndex) => (
+                  <td
+                    key={colIndex}
+                    className="px-6 py-4 border-b border-gray-200 text-gray-700"
+                  >
+                    {renderCellContent(
+                      column,
+                      row,
+                      toggleInStock,
+                      downloadInvoice,
+                      markOrderAsDelivered
+                    )}
+                  </td>
+                ))}
 
-              {globalActions && (
-                <td className="px-6 py-4 border-b border-gray-200 text-gray-700">
-                  <div className="flex gap-2">
-                    {globalActions.map((action, actionIndex) => (
-                      <button
-                        key={actionIndex}
-                        onClick={() => action.handler(row)}
-                        className={`px-3 py-1 text-sm rounded-md ${action.className}`}
-                      >
-                        {action.label}
-                      </button>
-                    ))}
-                  </div>
-                </td>
-              )}
-            </tr>
-          ))}
+                {globalActions && (
+                  <td className="px-6 py-4 border-b border-gray-200 text-gray-700">
+                    {row.status === "Verified" ||
+                    row.orderStatus === "Delivered" ? (
+                      <span className="text-gray-400">---</span> // Remove all actions if Delivered or Verified
+                    ) : row.orderStatus === "Processing" ? (
+                      <div className="flex gap-2">
+                        {globalActions
+                          .filter((action) => action.label === "Download") // Only show "Download" action
+                          .map((action, actionIndex) => (
+                            <button
+                              key={actionIndex}
+                              onClick={() => action.handler(row)}
+                              className={`px-3 py-1 text-sm rounded-md ${action.className}`}
+                            >
+                              {action.label}
+                            </button>
+                          ))}
+
+                        {/* Manually Add Delivered Button when orderStatus is Processing */}
+                        <button
+                          onClick={() => markOrderAsDelivered(row)}
+                          className="px-3 py-1 text-sm rounded-md bg-green-200 text-green-700 hover:bg-green-700 hover:text-green-200 transition-all"
+                        >
+                          Delivered
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        {globalActions.map((action, actionIndex) => (
+                          <button
+                            key={actionIndex}
+                            onClick={() => action.handler(row)}
+                            className={`px-3 py-1 text-sm rounded-md ${action.className}`}
+                          >
+                            {action.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </td>
+                )}
+              </tr>
+            )
+          )}
         </tbody>
       </table>
     </div>
@@ -73,25 +118,38 @@ const Table = ({ columns, data, globalActions, toggleInStock,downloadInvoice }) 
 };
 
 // Helper function to render cell content based on column type
-const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
+const renderCellContent = (column, row, toggleInStock, downloadInvoice) => {
   const value = row[column.accessor];
 
-  if (column.accessor === "User.name") {
-    return <span>{row.User?.name || "N/A"}</span>;
+  if (column.accessor === "user.name") {
+    return <span>{row.user?.name || "N/A"}</span>;
   }
 
-  if (column.accessor === "User.email") {
-    return <span>{row.User?.email || "N/A"}</span>;
+  if (column.accessor === "user.email") {
+    return <span>{row.user?.email || "N/A"}</span>;
   }
 
-  if (column.accessor === "User.phone") {
-    return <span>{row.User?.phone || "N/A"}</span>;
+  if (column.accessor === "user.phone") {
+    return <span>{row.user?.phone || "N/A"}</span>;
   }
   if (column.accessor === "product.title") {
     return <span>{row.product?.title || "N/A"}</span>;
   }
-  if (column.accessor === "KYC.status") {
-    return <span>{row.KYC?.status || "N/A"}</span>;
+  if (column.accessor === "kycStatus") {
+    return (
+      <span
+        className={`px-2 py-1 text-sm font-medium rounded-md ${
+          row.kycStatus === "Verified" || row.KYC?.status === "Active"
+            ? "bg-green-200 text-green-700"
+            : row.kycStatus === "Reverification needed" ||
+              row.KYC?.status === "Inactive"
+            ? "bg-red-200 text-red-700"
+            : "bg-yellow-200 text-yellow-700"
+        }`}
+      >
+        {row.kycStatus || "N/A"}
+      </span>
+    );
   }
   if (column.accessor === "Address.fullAddress") {
     return <span>{row.Address?.address || "N/A"}</span>;
@@ -131,6 +189,10 @@ const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
     return <span>{`${formattedDate} ${formattedTime}`}</span>;
   }
 
+  if (column.accessor === "category.name") {
+    return <span>{row.category?.name || "N/A"}</span>;
+  }
+
   if (column.accessor === "createdAt") {
     const dateObj = new Date(row.createdAt);
     const formattedDate = dateObj.toLocaleDateString("en-IN", {
@@ -138,7 +200,7 @@ const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
       month: "2-digit",
       year: "numeric",
     });
-  
+
     let formattedTime = dateObj.toLocaleTimeString("en-IN", {
       hour: "2-digit",
       minute: "2-digit",
@@ -146,14 +208,14 @@ const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
       hour12: true, // Ensures AM/PM format
       timeZone: "Asia/Kolkata",
     });
-  
+
     formattedTime = formattedTime.replace(/(am|pm)/i, (match) =>
       match.toUpperCase()
     );
-  
+
     return <span>{`${formattedDate} ${formattedTime}`}</span>;
   }
-  
+
   // Render checkbox for inStock column
   if (column.accessor === "inStock") {
     return (
@@ -168,19 +230,55 @@ const renderCellContent = (column, row, toggleInStock,downloadInvoice) => {
     );
   }
 
-    // Handle download button for invoice
-    if (column.accessor === "download") {
-      return (
-        <div className="flex justify-center items-center">
-          <DownloadButton
-            downloadInvoice={downloadInvoice}
-            userId={row.User?.id}
-            orderId={row.orderId}
-          />
-        </div>
-      );
-    }
-  
+  if (column.accessor === "status") {
+    return (
+      <div className="">
+        <span
+          className={`px-2 py-1 text-sm font-medium rounded-md ${
+            row.status === "Verified" || row.status === "Active"
+              ? "bg-green-200 text-green-700"
+              : row.status === "Reverification needed" ||
+                row.status === "Inactive"
+              ? "bg-red-200 text-red-700"
+              : "bg-yellow-200 text-yellow-700"
+          }`}
+        >
+          {row.status}
+        </span>
+      </div>
+    );
+  }
+
+  if (column.accessor === "orderStatus") {
+    return (
+      <div className="">
+        <span
+          className={`px-2 py-1 text-sm font-medium rounded-md ${
+            row.orderStatus === "Delivered"
+              ? "bg-green-200 text-green-700"
+              : row.orderStatus === "Processing"
+              ? "bg-blue-200 text-blue-700"
+              : "bg-yellow-200 text-yellow-700"
+          }`}
+        >
+          {row.orderStatus}
+        </span>
+      </div>
+    );
+  }
+
+  // Handle download button for invoice
+  if (column.accessor === "download") {
+    return (
+      <div className="flex justify-center items-center">
+        <DownloadButton
+          downloadInvoice={downloadInvoice}
+          userId={row.user?.id}
+          orderId={row.orderId}
+        />
+      </div>
+    );
+  }
 
   // Handle tags
   if (column.accessor === "tags" && Array.isArray(value)) {

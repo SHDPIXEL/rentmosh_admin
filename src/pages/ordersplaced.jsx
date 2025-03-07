@@ -99,14 +99,22 @@ const ListOrder = () => {
   };
 
   const handleDownloadInvoice = async (userId, orderId) => {
+    console.log("Downloading invoice for:", { userId, orderId }); // 🔍 Debugging
+  
+    if (!userId || !orderId) {
+      console.error("Missing userId or orderId");
+      toast.error("Invalid user or order details.");
+      return;
+    }
+  
     try {
       const response = await API.get(`/admin/invoice/${userId}/${orderId}`, {
-        responseType: "blob", // Ensures it handles files correctly
+        responseType: "blob",
       });
-
+  
       const blob = new Blob([response.data], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-
+  
       const a = document.createElement("a");
       a.href = url;
       a.download = `invoice-${userId}-${orderId}.pdf`;
@@ -116,22 +124,23 @@ const ListOrder = () => {
     } catch (error) {
       console.error(
         "Error downloading invoice:",
-        error.response?.data || error.message 
+        error.response?.data || error.message
       );
       toast.error("Invoice not found or server error.");
     }
   };
+  
 
   // Table columns
   const columns = [
     { header: "OrderId", accessor: "orderId" },
     { header: "Date", accessor: "date" },
-    { header: "User Name", accessor: "User.name" },
-    { header: "User Email", accessor: "User.email" },
-    { header: "User Phone", accessor: "User.phone" },
+    { header: "User Name", accessor: "user.name" },
+    { header: "User Email", accessor: "user.email" },
+    { header: "User Phone", accessor: "user.phone" },
     { header: "Product Name", accessor: "product.title" },
     { header: "Full Address", accessor: "fullAddress" },
-    { header: "KycId", accessor: "KYC.status" },
+    { header: "KycId", accessor: "kycStatus" },
     { header: "Order Status", accessor: "orderStatus" },
     { header: "Payment Method", accessor: "paymentMethod" },
     { header: "Download Invoice", accessor: "download" },
@@ -139,14 +148,14 @@ const ListOrder = () => {
 
   const actions = [
     {
-      label: <RefreshCcw className="w-4 h-4" />,
+      label: "Processing",
       handler: (row) => markOrderAsProcessing(row), // ✅ Mark as Processing
-      className: "text-blue-500 hover:text-blue-600",
+      className: "bg-blue-200 text-blue-700 hover:bg-blue-700 hover:text-blue-200 transition-all",
     },
     {
-      label: <CheckCircle className="w-4 h-4" />,
+      label: "Delivered",
       handler: (row) => markOrderAsDelivered(row), // ✅ Mark as Delivered
-      className: "text-green-500 hover:text-green-600",
+      className: "bg-green-200 text-green-700 hover:bg-green-700 hover:text-green-200 transition-all",
     },
   ];
 
@@ -164,6 +173,7 @@ const ListOrder = () => {
           data={orders}
           globalActions={actions}
           downloadInvoice={handleDownloadInvoice}
+          markOrderAsDelivered={markOrderAsDelivered}
         />
       ) : (
         <div className="text-center text-gray-600 mt-10">No orders found</div>

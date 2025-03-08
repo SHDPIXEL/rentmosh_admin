@@ -16,6 +16,7 @@ const ListOrder = () => {
     const fetchOrders = async () => {
       try {
         const response = await API.get("/admin/orders");
+        console.log(response.data.orders)
         setOrders(response.data.orders);
       } catch (error) {
         console.error("Error fetching customers:", error);
@@ -134,7 +135,7 @@ const ListOrder = () => {
     { header: "User Name", accessor: "user.name" },
     { header: "User Email", accessor: "user.email" },
     { header: "User Phone", accessor: "user.phone" },
-    { header: "Product Name", accessor: "product.title" },
+    { header: "Product Name", accessor: "orderItems.productTitle" },
     { header: "Full Address", accessor: "fullAddress" },
     { header: "KycId", accessor: "kycStatus" },
     { header: "Order Status", accessor: "orderStatus" },

@@ -130,8 +130,8 @@ const renderCellContent = (column, row, toggleInStock, downloadInvoice) => {
   if (column.accessor === "user.phone") {
     return <span>{row.user?.phone || "N/A"}</span>;
   }
-  if (column.accessor === "product.title") {
-    return <span>{row.product?.title || "N/A"}</span>;
+  if (column.accessor === "orderItems.productTitle") {
+    return <span>{row.orderItems[0]?.productTitle || "N/A"}</span>;
   }
   if (column.accessor === "kycStatus") {
     return (

@@ -19,21 +19,19 @@ const Table = ({
   downloadInvoice,
   markOrderAsDelivered,
 }) => {
-  console.log(columns, data, toggleInStock, markOrderAsDelivered);
-  console.log("Table Data:", data);
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full border-collapse border border-gray-200 bg-white shadow-md rounded-lg md:text-sm text-xs">
         {/* Table Header */}
         <thead>
-          <tr className="bg-gray-100 text-left text-gray-600 font-semibold uppercase tracking-wider">
+          <tr className="bg-gray-100 text-center text-gray-600 font-semibold uppercase tracking-wider">
             {columns.map((column, index) => (
-              <th key={index} className="px-6 py-3 border-b border-gray-200">
+              <th key={index} className="px-6 py-3 text-center border-b border-gray-200">
                 {column.header}
               </th>
             ))}
             {globalActions && (
-              <th className="px-6 py-3 border-b border-gray-200">Actions</th>
+              <th className="px-6 py-3 border-b text-center border-gray-200">Actions</th>
             )}
           </tr>
         </thead>
@@ -54,7 +52,7 @@ const Table = ({
                 {columns.map((column, colIndex) => (
                   <td
                     key={colIndex}
-                    className="px-6 py-4 border-b border-gray-200 text-gray-700"
+                    className="px-6 py-4 border-b text-center border-gray-200 text-gray-700"
                   >
                     {renderCellContent(
                       column,
@@ -67,19 +65,19 @@ const Table = ({
                 ))}
 
                 {globalActions && (
-                  <td className="px-6 py-4 border-b border-gray-200 text-gray-700">
+                  <td className="px-6 py-4 border-b text-center border-gray-200 text-gray-700">
                     {row.status === "Verified" ||
                     row.orderStatus === "Delivered" ? (
                       <span className="text-gray-400">---</span> // Remove all actions if Delivered or Verified
                     ) : row.orderStatus === "Processing" ? (
-                      <div className="flex gap-2">
+                      <div className="flex justify-center text-center gap-2">
                         {globalActions
                           .filter((action) => action.label === "Download") // Only show "Download" action
                           .map((action, actionIndex) => (
                             <button
                               key={actionIndex}
                               onClick={() => action.handler(row)}
-                              className={`px-3 py-1 text-sm rounded-md ${action.className}`}
+                              className={`px-3 py-1 text-sm text-center rounded-md ${action.className}`}
                             >
                               {action.label}
                             </button>
@@ -88,18 +86,18 @@ const Table = ({
                         {/* Manually Add Delivered Button when orderStatus is Processing */}
                         <button
                           onClick={() => markOrderAsDelivered(row)}
-                          className="px-3 py-1 text-sm rounded-md bg-green-200 text-green-700 hover:bg-green-700 hover:text-green-200 transition-all"
+                          className="px-3 py-1 text-sm text-center rounded-md bg-green-200 text-green-700 hover:bg-green-700 hover:text-green-200 transition-all"
                         >
                           Delivered
                         </button>
                       </div>
                     ) : (
-                      <div className="flex gap-2">
+                      <div className="flex justify-center items-center gap-2">
                         {globalActions.map((action, actionIndex) => (
                           <button
                             key={actionIndex}
                             onClick={() => action.handler(row)}
-                            className={`px-3 py-1 text-sm rounded-md ${action.className}`}
+                            className={`px-3 py-1 text-sm text-center rounded-md ${action.className}`}
                           >
                             {action.label}
                           </button>
@@ -138,7 +136,7 @@ const renderCellContent = (column, row, toggleInStock, downloadInvoice) => {
   if (column.accessor === "kycStatus") {
     return (
       <span
-        className={`px-2 py-1 text-sm font-medium rounded-md ${
+        className={`px-4 py-1 text-sm font-medium rounded-md min-w-[120px] text-center whitespace-nowrap ${
           row.kycStatus === "Verified" || row.KYC?.status === "Active"
             ? "bg-green-200 text-green-700"
             : row.kycStatus === "Reverification needed" ||
@@ -381,48 +379,33 @@ const renderCellContent = (column, row, toggleInStock, downloadInvoice) => {
   }
 
   if (column.accessor === "product_image" && value) {
-    //console.log("product_image value:", value);
-
     let imageArray = [];
-
+  
     try {
-      // Check if value is a string and looks like a JSON array
       if (typeof value === "string") {
-        // console.log("Raw product_image string value before cleaning:", value);
         const cleanedValue = value.replace(/\\"/g, '"').replace(/^"|"$/g, ""); // Remove extra quotes
-        // console.log("Cleaned product_image string:", cleanedValue);
         imageArray = JSON.parse(cleanedValue);
       } else {
-        imageArray = value; // If it's already an array, use it directly
+        imageArray = value;
       }
     } catch (error) {
       console.error("Error parsing product_image value:", error);
     }
-
-    // console.log("Parsed product_image imageArray:", imageArray);
-    // console.log(
-    //   "Type of product_image imageArray:",
-    //   Array.isArray(imageArray) ? "Array" : "Not Array"
-    // );
-
+  
     if (Array.isArray(imageArray) && imageArray.length > 0) {
-      const imageUrl = `${BASE_URL}/${imageArray[0]}`; // Use the first image in the array
-      // console.log("product_image imageUrl:", imageUrl);
       return (
-        <>
-          <img
-            key="1"
-            src={imageUrl}
-            alt={`product_image`}
-            className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
-          />
-        </>
+        <div className="grid grid-cols-2 w-40">
+          {imageArray.map((img, index) => (
+            <img
+              key={index}
+              src={`${BASE_URL}/${img}`}
+              alt={`product_image_${index}`}
+              className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
+            />
+          ))}
+        </div>
       );
-    } else {
-      // console.log("No images found in product_image array or array is empty.");
     }
-  } else {
-    // console.log(`No product_image value for column: ${column.accessor}`);
   }
 
   if (column.accessor === "subcategory_image" && value) {

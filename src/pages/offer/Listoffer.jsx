@@ -16,16 +16,16 @@ const ListOffer = () => {
     const fetchOffers = async () => {
       try {
         const response = await API.get("/admin/offers");
+  
         setOffers(response.data.offers);
       } catch (error) {
         console.error("Error fetching offers:", error);
-        toast.error("Failed to fetch offers.", { position: "top-right" });
       }
     };
-
+  
     fetchOffers();
   }, []);
-
+  
   // Custom confirmation toast
   const confirmAction = (message, onConfirm) => {
     toast.info(

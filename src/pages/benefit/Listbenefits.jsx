@@ -16,10 +16,10 @@ const ListBenefit = () => {
     const fetchBenefits = async () => {
       try {
         const response = await API.get("/admin/benefits");
+
         setBenefits(response.data.benefits);
       } catch (error) {
         console.error("Error fetching benefits:", error);
-        toast.error("Failed to fetch benefits.", { position: "top-right" });
       }
     };
 
@@ -60,7 +60,9 @@ const ListBenefit = () => {
         const response = await API.delete(`/admin/benefits/${id}`);
         if (response.status === 200) {
           setBenefits((prev) => prev.filter((item) => item.id !== id));
-          toast.success("Benefit deleted successfully!", { position: "top-right" });
+          toast.success("Benefit deleted successfully!", {
+            position: "top-right",
+          });
         }
       } catch (error) {
         console.error("Error deleting benefit:", error);
@@ -74,13 +76,19 @@ const ListBenefit = () => {
     confirmAction("Are you sure you want to change the status?", async () => {
       try {
         const newStatus = row.status === "Active" ? "Inactive" : "Active";
-        const response = await API.put(`/admin/benefits/${row.id}`, { status: newStatus });
+        const response = await API.put(`/admin/benefits/${row.id}`, {
+          status: newStatus,
+        });
 
         if (response.status === 200) {
           setBenefits((prev) =>
-            prev.map((item) => (item.id === row.id ? { ...item, status: newStatus } : item))
+            prev.map((item) =>
+              item.id === row.id ? { ...item, status: newStatus } : item
+            )
           );
-          toast.success(`Status changed to ${newStatus}!`, { position: "top-right" });
+          toast.success(`Status changed to ${newStatus}!`, {
+            position: "top-right",
+          });
         }
       } catch (error) {
         console.error("Error updating status:", error);
@@ -100,20 +108,21 @@ const ListBenefit = () => {
   // Table actions
   const actions = [
     {
-      label: <SquarePen className="w-4 h-4" />, 
-      handler: (row) => navigate("/benefit/add", { state: { benefitData: row } }), 
-      className: "text-green-500 hover:text-green-600"
+      label: <SquarePen className="w-4 h-4" />,
+      handler: (row) =>
+        navigate("/benefit/add", { state: { benefitData: row } }),
+      className: "text-green-500 hover:text-green-600",
     },
     {
-      label: <Trash2 className="w-4 h-4" />, 
-      handler: (row) => deleteBenefit(row.id), 
-      className: "text-red-500 hover:text-red-600"
+      label: <Trash2 className="w-4 h-4" />,
+      handler: (row) => deleteBenefit(row.id),
+      className: "text-red-500 hover:text-red-600",
     },
     {
-      label: <RefreshCcw className="w-4 h-4" />, 
-      handler: (row) => updateStatus(row), 
-      className: "text-blue-500 hover:text-blue-600"
-    }
+      label: <RefreshCcw className="w-4 h-4" />,
+      handler: (row) => updateStatus(row),
+      className: "text-blue-500 hover:text-blue-600",
+    },
   ];
 
   return (

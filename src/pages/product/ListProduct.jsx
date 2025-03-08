@@ -17,10 +17,10 @@ const ListProduct = () => {
     const fetchProducts = async () => {
       try {
         const response = await API.get("/admin/products");
+        console.log(response.data.products)
         setProducts(response.data.products);
       } catch (error) {
         console.error("Error fetching products:", error);
-        toast.error("Failed to fetch products.", { position: "top-right" });
       }
     };
     fetchProducts();

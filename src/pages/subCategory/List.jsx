@@ -16,11 +16,9 @@ const ListSubcategories = () => {
     const fetchSubcategories = async () => {
       try {
         const response = await API.get("/admin/subcategories");
-        console.log("sub",response.data.subcategories);
         setSubcategories(response.data.subcategories);
       } catch (error) {
         console.error("Error fetching subcategories:", error);
-        toast.error("Failed to fetch subcategories.", { position: "top-right" });
       }
     };
 

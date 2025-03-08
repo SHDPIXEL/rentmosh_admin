@@ -16,11 +16,9 @@ const ListCity = () => {
     const fetchCities = async () => {
       try {
         const response = await API.get("/admin/cities");
-        console.log(response.data.cities);
         setCities(response.data.cities);
       } catch (error) {
         console.error("Error fetching cities:", error);
-        toast.error("Failed to fetch cities.", { position: "top-right" });
       }
     };
 

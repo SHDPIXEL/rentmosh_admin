@@ -13,12 +13,9 @@ const ListCustomers = () => {
     const fetchCustomers = async () => {
       try {
         const response = await API.get("/admin/users");
-        console.log(response.data)
-        console.log(response.data.users); // Debugging log
         setCustomers(response.data.users);
       } catch (error) {
         console.error("Error fetching customers:", error);
-        toast.error("Failed to fetch customer data.", { position: "top-right" });
       }
     };
     fetchCustomers();

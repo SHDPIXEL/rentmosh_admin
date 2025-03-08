@@ -16,11 +16,9 @@ const ListKYC = () => {
     const fetchKycDetails = async () => {
       try {
         const response = await API.get("/admin/kyc");
-        console.log(response.data.kycRecords);
         setKycDetails(response.data.kycRecords);
       } catch (error) {
         console.error("Error fetching KYC details:", error);
-        toast.error("Failed to fetch KYC details.", { position: "top-right" });
       }
     };
     fetchKycDetails();
@@ -114,7 +112,6 @@ const ListKYC = () => {
           isVerified: 1, // ✅ Fix: Use `1` instead of `true`
           status: "Verified",
         });
-        console.log(response.data);
         setKycDetails((prev) =>
           prev.map((item) =>
             item.id === id
@@ -140,7 +137,6 @@ const ListKYC = () => {
             isVerified: 2,
             status: "Reverification needed",
           });
-          console.log(response.data);
           setKycDetails((prev) =>
             prev.map((item) =>
               item.id === id

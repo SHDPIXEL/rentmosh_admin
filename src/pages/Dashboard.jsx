@@ -85,7 +85,6 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchBookingChartData = async () => {
       const response = await API.get("/admin/orders-graph");
-      console.log(response.data.data)
       const data = response.data.data;
       setOrdersGraph(data);
     }
@@ -193,7 +192,7 @@ const Dashboard = () => {
               />
             </LineChart>
           </ResponsiveContainer>
-          <p className="font-bold text-gray-600 text-xl mt-2">Rented Furniture Trends</p>
+          <p className="font-bold text-gray-600 text-xl mt-2">Order's Trends</p>
         </div>
 
         {/* Pie Chart */}

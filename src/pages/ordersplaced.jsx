@@ -16,13 +16,9 @@ const ListOrder = () => {
     const fetchOrders = async () => {
       try {
         const response = await API.get("/admin/orders");
-        console.log(response.data.orders); // Debugging log
         setOrders(response.data.orders);
       } catch (error) {
         console.error("Error fetching customers:", error);
-        toast.error("Failed to fetch customer data.", {
-          position: "top-right",
-        });
       }
     };
     fetchOrders();
@@ -64,6 +60,7 @@ const ListOrder = () => {
   };
 
   const updateOrderStatus = async (row, newStatus) => {
+
     confirmAction(
       `Are you sure you want to update the status to ${newStatus}?`,
       async () => {
@@ -89,7 +86,7 @@ const ListOrder = () => {
             });
           }
         } catch (error) {
-          console.error("Error updating order status:", error);
+          console.error("Error updating order status:", error.response?.data || error);
           toast.error("Error updating order status.", {
             position: "top-right",
           });
@@ -99,7 +96,6 @@ const ListOrder = () => {
   };
 
   const handleDownloadInvoice = async (userId, orderId) => {
-    console.log("Downloading invoice for:", { userId, orderId }); // 🔍 Debugging
   
     if (!userId || !orderId) {
       console.error("Missing userId or orderId");

@@ -16,11 +16,9 @@ const ListCategory = () => {
     const fetchCategories = async () => {
       try {
         const response = await API.get("/admin/categories");
-        console.log(response.data)
         setCategories(response.data); // Ensure categories is always an array
       } catch (error) {
         console.error("Error fetching categories:", error);
-        toast.error("Failed to fetch categories.", { position: "top-right" });
         setCategories([]); // In case of error, ensure categories is an empty array
       }
     };

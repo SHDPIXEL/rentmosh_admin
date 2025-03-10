@@ -1,8 +1,8 @@
 import axios from "axios";
 
 // Base URL for the API
-// export const BASE_URL = "https://erj4paephv.ap-south-1.awsapprunner.com"; // Replace with your server's base URL
-export const BASE_URL = "http://192.168.1.11:4060"; // Replace with your server's base URL
+export const BASE_URL = "https://erj4paephv.ap-south-1.awsapprunner.com"; // Replace with your server's base URL
+// export const BASE_URL = "http://192.168.1.11:4060"; // Replace with your server's base URL
 //export const BASE_URL = "http://172.20.10.3:4030"; // Replace with your server's base URL
 
 // Create an Axios instance

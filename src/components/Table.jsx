@@ -334,49 +334,41 @@ const renderCellContent = (column, row, toggleInStock, downloadInvoice) => {
   }
 
   if (column.accessor === "category_image" && value) {
-    // console.log("category_image value:", value);
-
     let imageArray = [];
-
+  
     try {
-      // Check if value is a string and looks like a JSON array
-      if (typeof value === "string") {
-        // console.log("Raw category_image string value before cleaning:", value);
+      // Check if value is a string and looks like a JSON array (starts with "[" and ends with "]")
+      if (typeof value === "string" && value.trim().startsWith('[') && value.trim().endsWith(']')) {
         const cleanedValue = value.replace(/\\"/g, '"').replace(/^"|"$/g, ""); // Remove extra quotes
-        // console.log("Cleaned category_image string:", cleanedValue);
         imageArray = JSON.parse(cleanedValue);
-      } else {
+      } else if (Array.isArray(value)) {
         imageArray = value; // If it's already an array, use it directly
+      } else {
+        // If it's not a string or array, handle it as a single image path (fallback)
+        imageArray = [value];
       }
     } catch (error) {
       console.error("Error parsing category_image value:", error);
     }
-
-    // console.log("Parsed category_image imageArray:", imageArray);
-    // console.log(
-    //   "Type of category_image imageArray:",
-    //   Array.isArray(imageArray) ? "Array" : "Not Array"
-    // );
-
+  
     if (Array.isArray(imageArray) && imageArray.length > 0) {
       const imageUrl = `${BASE_URL}/${imageArray[0]}`; // Use the first image in the array
-      // console.log("category_image imageUrl:", imageUrl);
+      console.log("category_image imageUrl:", imageUrl);
       return (
-        <>
-          <img
-            key="1"
-            src={imageUrl}
-            alt={`category_image`}
-            className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
-          />
-        </>
+        <img
+          key="1"
+          src={imageUrl}
+          alt={`category_image`}
+          className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
+        />
       );
     } else {
-      // console.log("No images found in category_image array or array is empty.");
+      console.log("No images found in category_image array or array is empty.");
     }
   } else {
-    // console.log(`No category_image value for column: ${column.accessor}`);
+    console.log(`No category_image value for column: ${column.accessor}`);
   }
+  
 
   if (column.accessor === "product_image" && value) {
     let imageArray = [];

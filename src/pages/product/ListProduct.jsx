@@ -169,7 +169,7 @@ const ListProduct = () => {
       </Helmet>
       <h1 className="text-2xl font-bold mb-4 text-gray-800">Product List</h1>
 
-      {/* Dropdown or selection for rental duration */}
+      {/* Dropdown or selection for rental duration
       <div className="mb-4">
         <label htmlFor="rental-duration" className="mr-2">Select Rental Duration:</label>
         <select
@@ -181,7 +181,7 @@ const ListProduct = () => {
           <option value="3 months">3 months</option>
           <option value="6 months">6 months</option>
         </select>
-      </div>
+      </div> */}
 
       {products.length > 0 ? (
         <Table columns={columns} data={products} globalActions={actions}  toggleInStock={toggleInStock} />

@@ -400,7 +400,7 @@ const renderCellContent = (column, row, toggleInStock, downloadInvoice) => {
               key={index}
               src={`${BASE_URL}/${img}`}
               alt={`product_image_${index}`}
-              className="w-12 h-12 object-cover rounded-md border border-gray-200 hover:scale-105"
+              className="w-12 h-12 mb-5 object-cover rounded-md border border-gray-200 hover:scale-105"
             />
           ))}
         </div>

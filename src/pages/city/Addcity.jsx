@@ -10,7 +10,7 @@ const AddCity = () => {
     id: null, // Ensure ID is tracked for updates
     name: "",
     city_image: null,
-    slug: "",
+    // slug: "",
     status: "",
   });
 
@@ -24,7 +24,7 @@ const AddCity = () => {
       setFormData({
         id: cityData.id || "", // Ensure id is set
         name: cityData.name || "",
-        slug: cityData.slug || "",
+        // slug: cityData.slug || "",
         status: cityData.status || "",
         city_image: cityData.city_image || "",
       });
@@ -40,7 +40,7 @@ const AddCity = () => {
           setFormData({
             id: response.data.city.id, // Ensure ID is assigned
             name: response.data.city.name,
-            slug: response.data.city.slug,
+            // slug: response.data.city.slug,
             status: response.data.city.status,
             city_image: response.data.city.city_image || null,
           });
@@ -81,9 +81,9 @@ const AddCity = () => {
       if (formData.name) {
         cityData.append("name", formData.name);
       }
-      if (formData.slug) {
-        cityData.append("slug", formData.slug);
-      }
+      // if (formData.slug) {
+      //   cityData.append("slug", formData.slug);
+      // }
   
       // Only append image if it's a new file (not an existing URL)
       if (formData.city_image && typeof formData.city_image !== "string") {
@@ -120,7 +120,7 @@ const AddCity = () => {
       }
   
       // Reset form after success
-      setFormData({ id: "", name: "", city_image: null, slug: "", status: "" });
+      setFormData({ id: "", name: "", city_image: null, status: "" });
     } catch (error) {
       console.error("Error submitting city:", error);
       toast.error(
@@ -182,7 +182,7 @@ const AddCity = () => {
             </p>
           )}
         </div>
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <label
             htmlFor="slug"
             className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
@@ -199,7 +199,7 @@ const AddCity = () => {
             className="p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-300"
             required
           />
-        </div>
+        </div> */}
         <div className="flex flex-col">
           <label
             htmlFor="status"

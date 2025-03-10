@@ -10,7 +10,7 @@ const AddCategory = () => {
     id: null,
     name: "",
     category_image: null,
-    slug: "",
+    // slug: "",
     status: "",
   });
 
@@ -25,7 +25,7 @@ const AddCategory = () => {
       setFormData({
         id: categoryData.id || "",
         name: categoryData.name || "",
-        slug: categoryData.slug || "",
+        // slug: categoryData.slug || "",
         status: categoryData.status || "",
         category_image: categoryData.category_image || null,
       });
@@ -40,7 +40,7 @@ const AddCategory = () => {
           setFormData({
             id: response.data.category.id,
             name: response.data.category.name,
-            slug: response.data.category.slug,
+            // slug: response.data.category.slug,
             status: response.data.category.status,
             category_image: response.data.category.category_image || null,
           });
@@ -80,9 +80,9 @@ const AddCategory = () => {
       if (formData.name) {
         categoryData.append("name", formData.name);
       }
-      if (formData.slug) {
-        categoryData.append("slug", formData.slug);
-      }
+      // if (formData.slug) {
+      //   categoryData.append("slug", formData.slug);
+      // }
 
       if (formData.category_image && typeof formData.category_image !== "string") {
         categoryData.append("category_image", formData.category_image);
@@ -118,7 +118,7 @@ const AddCategory = () => {
       }
 
       // Reset form after success
-      setFormData({ id: "", name: "", category_image: null, slug: "", status: "" });
+      setFormData({ id: "", name: "", category_image: null, status: "" });
     } catch (error) {
       console.error("Error submitting category:", error);
       toast.error(
@@ -187,7 +187,7 @@ const AddCategory = () => {
           </div>
         </div>
 
-        {/* Slug */}
+        {/* Slug
         <div className="flex flex-col">
           <label
             htmlFor="slug"
@@ -204,9 +204,8 @@ const AddCategory = () => {
             onChange={handleChange}
             className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
             placeholder="Enter Slug"
-            required
           />
-        </div>
+        </div> */}
 
         {/* Status */}
         <div className="flex flex-col">

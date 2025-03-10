@@ -15,7 +15,7 @@ const AddSubcategory = () => {
     categoryId: "",
     name: "",
     subcategory_image: null,
-    slug: "",
+    // slug: "",
     status: "",
   });
 
@@ -53,7 +53,7 @@ const AddSubcategory = () => {
         id: subcategoryData.id || "",
         categoryId: subcategoryData.categoryId || "",
         name: subcategoryData.name || "",
-        slug: subcategoryData.slug || "",
+        // slug: subcategoryData.slug || "",
         status: subcategoryData.status || "",
         subcategory_image: subcategoryData.subcategory_image || null,
       });
@@ -73,7 +73,7 @@ const AddSubcategory = () => {
     e.preventDefault();
 
     // Validate required fields
-    if (!formData.categoryId || !formData.name || !formData.slug) {
+    if (!formData.categoryId || !formData.name) {
       toast.error("Category, Name, and Slug are required fields.", {
         position: "top-right",
       });
@@ -87,7 +87,7 @@ const AddSubcategory = () => {
       const subcategoryData = new FormData();
       subcategoryData.append("categoryId", formData.categoryId);
       subcategoryData.append("name", formData.name);
-      subcategoryData.append("slug", formData.slug);
+      // subcategoryData.append("slug", formData.slug);
       subcategoryData.append("status", formData.status || "active");
 
       if (formData.subcategory_image && typeof formData.subcategory_image !== "string") {
@@ -130,7 +130,7 @@ const AddSubcategory = () => {
         categoryId: "",
         name: "",
         subcategory_image: null,
-        slug: "",
+        // slug: "",
         status: "",
       });
     } catch (error) {
@@ -223,7 +223,7 @@ const AddSubcategory = () => {
             </div>
           </div>
 
-          {/* Slug */}
+          {/* Slug
           <div className="flex flex-col">
             <label htmlFor="slug" className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
               <Hash className="h-4 w-4 text-gray-400" />
@@ -237,9 +237,8 @@ const AddSubcategory = () => {
               onChange={handleChange}
               className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200"
               placeholder="Enter Slug"
-              required
             />
-          </div>
+          </div> */}
 
           {/* Status */}
           <div className="flex flex-col">

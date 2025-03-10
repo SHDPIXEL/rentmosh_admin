@@ -9,7 +9,7 @@ const AddBenefits = () => {
   const [formData, setFormData] = useState({
     id: null, // Ensure ID is null by default
     title: "",
-    slug: "",
+    // slug: "",
     description: "",
     status: "",
   });
@@ -24,7 +24,7 @@ const AddBenefits = () => {
       setFormData({
         id: benefitData.id || "", // Ensure ID is null if not available
         title: benefitData.title || "",
-        slug: benefitData.slug || "",
+        // slug: benefitData.slug || "",
         description: benefitData.description || "",
         status: benefitData.status || "",
       });
@@ -39,7 +39,7 @@ const AddBenefits = () => {
           setFormData({
             id: response.data.benefit.id, // Ensure ID is set properly
             title: response.data.benefit.title,
-            slug: response.data.benefit.slug,
+            // slug: response.data.benefit.slug,
             description: response.data.benefit.description,
             status: response.data.benefit.status,
           });
@@ -121,7 +121,7 @@ const AddBenefits = () => {
         </div>
 
         {/* Slug */}
-        <div className="flex flex-col">
+        {/* <div className="flex flex-col">
           <label
             htmlFor="slug"
             className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2"
@@ -139,7 +139,7 @@ const AddBenefits = () => {
             placeholder="Enter Slug"
             required
           />
-        </div>
+        </div> */}
 
         {/* Description */}
         <div className="flex flex-col">

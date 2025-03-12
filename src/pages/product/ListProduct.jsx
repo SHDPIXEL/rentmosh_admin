@@ -107,6 +107,7 @@ const ListProduct = () => {
     { header: "Title", accessor: "title" },
     { header: "Subcategories", accessor: "subcategoryId" },
     { header: "Benefits", accessor: "benefitId" },
+    { header: "Description", accessor: "description" },
     {
       header: "Image",
       accessor: "product_image",

@@ -20,7 +20,9 @@ const AddProduct = () => {
     price: [
       { months: "3 months", amount: 600 },
       { months: "6 months", amount: 1500 },
+      {months: "12 months", amount: 2500}
     ],
+    description: "",
     brand: "",
     size: "",
     material: "",
@@ -119,7 +121,9 @@ const AddProduct = () => {
         price: productData.price || [
           { months: "3 months", amount: 600 },
           { months: "6 months", amount: 1500 },
+          {months: "12 months", amount: 2500},
         ],
+        description: productData.description || "",
         brand: productData.brand || "",
         size: productData.size || "",
         material: productData.material || "",
@@ -198,6 +202,7 @@ const AddProduct = () => {
       productData.append("benefitId", formData.benefitId);
       productData.append("title", formData.title);
       productData.append("location", formData.location);
+      productData.append("description", formData.description || "");
       productData.append("brand", formData.brand || "");
       productData.append("size", formData.size || "");
       productData.append("material", formData.material || "");
@@ -276,7 +281,9 @@ const AddProduct = () => {
         price: [
           { months: "3 months", amount: 600 },
           { months: "6 months", amount: 1500 },
+          {months: "12 months", amount: 2500},
         ],
+        description: "",
         brand: "",
         size: "",
         material: "",
@@ -485,6 +492,28 @@ const AddProduct = () => {
               </div>
             ))}
         </div>
+
+        {/* Description */}
+
+        <div className="flex flex-col">
+            <label
+              htmlFor="description"
+              className="text-sm font-medium text-gray-700 mb-2"
+            >
+              Description
+            </label>
+            <textarea
+              name="description"
+              id="description"
+              value={formData.description}
+              onChange={handleChange}
+              className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm transition-all duration-200 min-h-[100px]"
+              placeholder="Enter description"
+              required
+            />
+          </div>
+
+
 
         {/* Brand, Size, Material, Colour, Status */}
         <div className="flex flex-col space-y-4">
